@@ -20,6 +20,8 @@ import AdminCampaigns from "./pages/admin/Campaigns";
 import AdminAlerts from "./pages/admin/Alerts";
 import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
+import AdminMatchingEngine from "./pages/admin/MatchingEngine";
+import InstallApp from "./pages/InstallApp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +42,7 @@ const App = () => (
             <Route path="/camps" element={<BloodCamps />} />
             <Route path="/organize" element={<OrganizeCamp />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/install" element={<InstallApp />} />
           </Route>
 
           {/* Admin routes */}
@@ -52,6 +55,7 @@ const App = () => (
             <Route path="alerts" element={<AdminAlerts />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="matching" element={<AdminMatchingEngine />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
