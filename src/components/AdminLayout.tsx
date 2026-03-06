@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Heart, Users, Building2, Calendar, Bell, BarChart3, Settings, Droplets, LogOut } from 'lucide-react';
+import { LayoutDashboard, Heart, Users, Building2, Calendar, Bell, BarChart3, Settings, Droplets, LogOut, Zap } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
@@ -15,6 +15,7 @@ const items = [
   { title: 'Alerts', url: '/admin/alerts', icon: Bell },
   { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
   { title: 'Settings', url: '/admin/settings', icon: Settings },
+  { title: 'Matching Engine', url: '/admin/matching', icon: Zap },
 ];
 
 function AdminSidebar() {
