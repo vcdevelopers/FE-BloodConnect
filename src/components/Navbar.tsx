@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Droplets, Heart } from 'lucide-react';
+import { Menu, X, Droplets } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const navLinks = [
@@ -18,13 +18,13 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-14 items-center justify-between lg:h-16">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Droplets className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary lg:h-9 lg:w-9">
+            <Droplets className="h-4 w-4 text-primary-foreground lg:h-5 lg:w-5" />
           </div>
-          <span className="text-lg font-bold tracking-tight">
-            Mumbai <span className="text-primary">Blood</span> Connect
+          <span className="text-base font-bold tracking-tight lg:text-lg">
+            <span className="text-primary">Blood</span>Connect
           </span>
         </Link>
 
@@ -42,28 +42,30 @@ export function Navbar() {
             </Link>
           ))}
           <Link to="/login">
-            <Button variant="outline" size="sm" className="ml-2">
-              Login
-            </Button>
+            <Button variant="outline" size="sm" className="ml-2">Login</Button>
           </Link>
         </nav>
 
         {/* Mobile toggle */}
-        <button className="lg:hidden" onClick={() => setOpen(!open)} aria-label="Toggle menu">
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        <button
+          className="flex h-10 w-10 items-center justify-center rounded-lg active:bg-muted lg:hidden"
+          onClick={() => setOpen(!open)}
+          aria-label="Toggle menu"
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
       {/* Mobile nav */}
       {open && (
-        <nav className="border-t bg-background p-4 lg:hidden">
-          <div className="flex flex-col gap-1">
+        <nav className="border-t bg-background p-3 lg:hidden">
+          <div className="flex flex-col gap-0.5">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
                 onClick={() => setOpen(false)}
-                className={`rounded-md px-4 py-3 text-sm font-medium transition-colors ${
+                className={`rounded-lg px-4 py-3.5 text-sm font-medium transition-colors active:bg-muted ${
                   pathname === link.href ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'
                 }`}
               >
@@ -71,7 +73,7 @@ export function Navbar() {
               </Link>
             ))}
             <Link to="/login" onClick={() => setOpen(false)}>
-              <Button variant="outline" className="mt-2 w-full">Login</Button>
+              <Button variant="outline" className="mt-2 w-full h-12">Login</Button>
             </Link>
           </div>
         </nav>
