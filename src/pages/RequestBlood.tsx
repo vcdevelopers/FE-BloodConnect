@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BLOOD_GROUPS, URGENCY_LEVELS } from '@/lib/mock-data';
+import { BLOOD_GROUPS, URGENCY_LEVELS, Group } from '@/lib/mock-data';
 
 export default function RequestBlood() {
   const [submitted, setSubmitted] = useState(false);
@@ -52,8 +52,17 @@ export default function RequestBlood() {
                   <Input id="patient" placeholder="Patient's full name" required />
                 </div>
                 <div>
-                  <Label>Blood Group Required *</Label>
-                  <Select required>
+                  <Label>Blood Requirement Type</Label>
+                  <Select>
+                    <SelectTrigger><SelectValue placeholder="Select group" /></SelectTrigger>
+                    <SelectContent>
+                      {Group.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Blood Group</Label>
+                  <Select>
                     <SelectTrigger><SelectValue placeholder="Select blood group" /></SelectTrigger>
                     <SelectContent>
                       {BLOOD_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}

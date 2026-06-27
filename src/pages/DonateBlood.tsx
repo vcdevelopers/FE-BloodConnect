@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BLOOD_GROUPS, MUMBAI_ZONES } from '@/lib/mock-data';
+import { BLOOD_GROUPS, MUMBAI_ZONES, Group } from '@/lib/mock-data';
 
 export default function DonateBlood() {
   const [submitted, setSubmitted] = useState(false);
@@ -70,8 +70,17 @@ export default function DonateBlood() {
                   </Select>
                 </div>
                 <div>
-                  <Label>Blood Group *</Label>
-                  <Select required>
+                  <Label>Blood Requirement Type</Label>
+                  <Select>
+                    <SelectTrigger><SelectValue placeholder="Select group" /></SelectTrigger>
+                    <SelectContent>
+                      {Group.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Blood Group</Label>
+                  <Select>
                     <SelectTrigger><SelectValue placeholder="Select blood group" /></SelectTrigger>
                     <SelectContent>
                       {BLOOD_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}

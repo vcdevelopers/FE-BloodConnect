@@ -24,8 +24,9 @@ export function Navbar() {
             <Droplets className="h-4 w-4 text-primary-foreground lg:h-5 lg:w-5" />
           </div>
           <span className="text-base font-bold tracking-tight lg:text-lg">
-            <span className="text-primary">Blood</span>Connect
+            <span className="text-primary">Mumbai Blood</span>Connect
           </span>
+          
         </Link>
 
         {/* Desktop nav */}
@@ -44,6 +45,11 @@ export function Navbar() {
           <Link to="/login">
             <Button variant="outline" size="sm" className="ml-2">Login</Button>
           </Link>
+         <img
+    src="/Rotary-3141 Logo.png"
+    alt="Rotary Logo"
+    className="h-10 w-auto object-contain mb-1 pl-2"
+  />
         </nav>
 
         {/* Mobile toggle */}

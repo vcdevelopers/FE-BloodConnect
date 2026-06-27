@@ -1,4 +1,5 @@
 export const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const;
+export const Group=['Blood','Platets','Plasma']
 export type BloodGroup = typeof BLOOD_GROUPS[number];
 
 export const MUMBAI_ZONES = [

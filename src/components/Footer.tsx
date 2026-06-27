@@ -7,6 +7,13 @@ export function Footer() {
       <div className="container py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
+            <div>
+  {/* Rotary Logo */}
+  <img
+    src="/Rotary-3141 Logo.png"
+    alt="Rotary Logo"
+    className="h-12 w-auto object-contain mb-1 pl-10"
+  /></div>
             <div className="flex items-center gap-2 mb-4">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Droplets className="h-4 w-4 text-primary-foreground" />
@@ -33,16 +40,19 @@ export function Footer() {
             <div className="flex flex-col gap-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary" />
-                <span>+91 22 1234 5678</span>
+                <span>(022) - 26772036 / 66952036</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary" />
-                <span>Emergency: 108</span>
+                {/* <span>Emergency: 108</span> */}
+                <span>(022) - 66922036 / 42642036</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>help@mumbaiblood.org</span>
+                <span>arun.wadhwa@envisageideas.com</span>
+                
               </div>
+              {/* <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;info@digielvestech.in</span> */}
             </div>
           </div>
 
