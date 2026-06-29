@@ -1,15 +1,9 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Heart, Droplets, Users, Activity, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
+import { Search, Heart, Droplets, Users, Activity, Calendar, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { mockStats, mockCampaigns } from '@/lib/mock-data';
-
-const stats = [
-  { label: 'Registered Donors', value: mockStats.totalDonors.toLocaleString(), icon: Users, color: 'text-primary' },
-  { label: 'Requests Today', value: mockStats.requestsToday, icon: Activity, color: 'text-warning' },
-  { label: 'Units Available', value: mockStats.unitsAvailable, icon: Droplets, color: 'text-success' },
-  { label: 'Active Campaigns', value: mockStats.activeCampaigns, icon: Calendar, color: 'text-accent' },
-];
 
 const steps = [
   { step: 1, title: 'Search Blood', description: 'Find available blood in hospitals and blood banks near you.', icon: Search },
@@ -18,6 +12,54 @@ const steps = [
 ];
 
 export default function Index() {
+  const [statsData, setStatsData] = useState(mockStats);
+  const [camps, setCamps] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStats = () => {
+      fetch('/api/stats/')
+        .then(res => res.json())
+        .then(data => {
+          setStatsData(data);
+        })
+        .catch(err => console.error('Error fetching stats:', err));
+    };
+
+    const loadCamps = () => {
+      fetch('/api/camps/')
+        .then(res => res.json())
+        .then(data => {
+          setCamps(data);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error('Error fetching camps:', err);
+          setLoading(false);
+        });
+    };
+
+    loadStats();
+    loadCamps();
+
+    const statsInterval = setInterval(loadStats, 5000);
+    const campsInterval = setInterval(loadCamps, 5000);
+
+    return () => {
+      clearInterval(statsInterval);
+      clearInterval(campsInterval);
+    };
+  }, []);
+
+  const stats = [
+    { label: 'Registered Donors', value: statsData.totalDonors.toLocaleString(), icon: Users, color: 'text-primary' },
+    { label: 'Requests Today', value: statsData.requestsToday, icon: Activity, color: 'text-warning' },
+    { label: 'Units Available', value: statsData.unitsAvailable, icon: Droplets, color: 'text-success' },
+    { label: 'Active Campaigns', value: statsData.activeCampaigns, icon: Calendar, color: 'text-accent' },
+  ];
+
+  const displayedCamps = camps.length > 0 ? camps.slice(0, 3) : mockCampaigns.slice(0, 3);
+
   return (
     <div>
       {/* Hero */}
@@ -106,24 +148,33 @@ export default function Index() {
               View All <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {mockCampaigns.slice(0, 3).map((camp) => (
-              <Card key={camp.id} className="overflow-hidden">
-                <div className="h-2 bg-primary" />
-                <CardContent className="p-5">
-                  <div className="mb-2 text-xs font-medium text-primary">{camp.date} • {camp.time}</div>
-                  <h3 className="mb-1 text-lg font-bold">{camp.name}</h3>
-                  <p className="mb-3 text-sm text-muted-foreground">{camp.organizer} • {camp.location}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{camp.slotsBooked}/{camp.slots} registered</span>
-                    <Link to={`/camps/${camp.id}`}>
-                      <Button size="sm" variant="outline">Register</Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex h-20 items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {displayedCamps.map((camp) => {
+                const booked = camp.slots_booked !== undefined ? camp.slots_booked : camp.slotsBooked || 0;
+                return (
+                  <Card key={camp.id} className="overflow-hidden">
+                    <div className="h-2 bg-primary" />
+                    <CardContent className="p-5">
+                      <div className="mb-2 text-xs font-medium text-primary">{camp.date} • {camp.time}</div>
+                      <h3 className="mb-1 text-lg font-bold">{camp.name}</h3>
+                      <p className="mb-3 text-sm text-muted-foreground">{camp.organizer} • {camp.location}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">{booked}/{camp.slots} registered</span>
+                        <Link to="/camps">
+                          <Button size="sm" variant="outline">Register</Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
           <Link to="/camps" className="mt-6 flex items-center justify-center gap-1 text-sm font-medium text-primary hover:underline sm:hidden">
             View All Camps <ArrowRight className="h-4 w-4" />
           </Link>

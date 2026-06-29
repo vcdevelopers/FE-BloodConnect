@@ -1,16 +1,69 @@
 import { useState } from 'react';
-import { Heart, CheckCircle } from 'lucide-react';
+import { Heart, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BLOOD_GROUPS, MUMBAI_ZONES, Group } from '@/lib/mock-data';
+import { BLOOD_GROUPS, MUMBAI_ZONES } from '@/lib/mock-data';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DonateBlood() {
   const [submitted, setSubmitted] = useState(false);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [lastDonation, setLastDonation] = useState('');
+  const [zone, setZone] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const payload = {
+      name,
+      phone,
+      email: email || '',
+      age: parseInt(age) || 0,
+      gender,
+      blood_group: bloodGroup,
+      last_donation: lastDonation || null,
+      zone,
+      status: 'active',
+      eligible: true,
+      total_donations: lastDonation ? 1 : 0
+    };
+
+    fetch('/api/donors/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Registration failed');
+        return res.json();
+      })
+      .then(() => {
+        setSubmitted(true);
+      })
+      .catch(err => {
+        console.error(err);
+        toast({
+          variant: 'destructive',
+          title: 'Registration Failed',
+          description: 'Could not register as a donor. Please check the inputs and try again.',
+        });
+        setIsSubmitting(false);
+      });
+  };
 
   if (submitted) {
     return (
@@ -40,27 +93,54 @@ export default function DonateBlood() {
 
         <Card>
           <CardContent className="p-6">
-            <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="name">Full Name *</Label>
-                  <Input id="name" placeholder="Your full name" required />
+                  <Input 
+                    id="name" 
+                    placeholder="Your full name" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="mobile">Mobile Number *</Label>
-                  <Input id="mobile" placeholder="+91 98765 43210" required />
+                  <Input 
+                    id="mobile" 
+                    placeholder="+91 98765 43210" 
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="your@email.com" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="your@email.com" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="age">Age *</Label>
-                  <Input id="age" type="number" min={18} max={65} placeholder="18-65" required />
+                  <Input 
+                    id="age" 
+                    type="number" 
+                    min={18} 
+                    max={65} 
+                    placeholder="18-65" 
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    required 
+                  />
                 </div>
                 <div>
                   <Label>Gender *</Label>
-                  <Select required>
+                  <Select value={gender} onValueChange={setGender} required>
                     <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Male">Male</SelectItem>
@@ -70,17 +150,8 @@ export default function DonateBlood() {
                   </Select>
                 </div>
                 <div>
-                  <Label>Blood Requirement Type</Label>
-                  <Select>
-                    <SelectTrigger><SelectValue placeholder="Select group" /></SelectTrigger>
-                    <SelectContent>
-                      {Group.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Blood Group</Label>
-                  <Select>
+                  <Label>Blood Group *</Label>
+                  <Select value={bloodGroup} onValueChange={setBloodGroup} required>
                     <SelectTrigger><SelectValue placeholder="Select blood group" /></SelectTrigger>
                     <SelectContent>
                       {BLOOD_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
@@ -89,22 +160,22 @@ export default function DonateBlood() {
                 </div>
                 <div>
                   <Label htmlFor="lastDonation">Last Donation Date</Label>
-                  <Input id="lastDonation" type="date" />
+                  <Input 
+                    id="lastDonation" 
+                    type="date" 
+                    value={lastDonation}
+                    onChange={(e) => setLastDonation(e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label>Preferred Area in Mumbai *</Label>
-                  <Select required>
+                  <Select value={zone} onValueChange={setZone} required>
                     <SelectTrigger><SelectValue placeholder="Select area" /></SelectTrigger>
                     <SelectContent>
                       {MUMBAI_ZONES.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="address">Address</Label>
-                <Textarea id="address" placeholder="Your address in Mumbai" />
               </div>
 
               <div className="rounded-lg border bg-muted/50 p-4">
@@ -127,8 +198,16 @@ export default function DonateBlood() {
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full gap-2">
-                <Heart className="h-5 w-5" /> Register as Donor
+              <Button type="submit" size="lg" className="w-full gap-2" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" /> Registering...
+                  </>
+                ) : (
+                  <>
+                    <Heart className="h-5 w-5" /> Register as Donor
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>

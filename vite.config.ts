@@ -5,41 +5,20 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => ({
+  base: "/static/",
   server: {
     host: "::",
     port: 8080,
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/api': 'http://127.0.0.1:8000'
+    }
   },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    VitePWA({
-      registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "pwa-192x192.png", "pwa-512x512.png"],
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-        navigateFallbackDenylist: [/^\/~oauth/],
-      },
-      manifest: {
-        name: "Mumbai Blood Connect",
-        short_name: "BloodConnect",
-        description: "Find blood, save lives. Mumbai's blood donation & availability platform.",
-        theme_color: "#DC2626",
-        background_color: "#FFFFFF",
-        display: "standalone",
-        orientation: "portrait",
-        scope: "/",
-        start_url: "/",
-        categories: ["health", "medical"],
-        icons: [
-          { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
-          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
-          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-        ],
-      },
-    }),
   ].filter(Boolean),
   resolve: {
     alias: {

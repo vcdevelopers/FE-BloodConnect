@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { LayoutDashboard, Heart, Users, Building2, Calendar, Bell, BarChart3, Settings, Droplets, LogOut, Zap } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -59,7 +59,11 @@ function AdminSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to="/" className="hover:bg-sidebar-accent/50">
+                  <Link 
+                    to="/" 
+                    onClick={() => localStorage.removeItem('admin_token')}
+                    className="hover:bg-sidebar-accent/50"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     {!collapsed && <span>Back to Site</span>}
                   </Link>
@@ -74,6 +78,12 @@ function AdminSidebar() {
 }
 
 export function AdminLayout() {
+  const isAdmin = localStorage.getItem('admin_token') === 'true';
+
+  if (!isAdmin) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">

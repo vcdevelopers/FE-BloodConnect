@@ -46,7 +46,7 @@ export function Navbar() {
             <Button variant="outline" size="sm" className="ml-2">Login</Button>
           </Link>
          <img
-    src="/Rotary-3141 Logo.png"
+    src="/static/Rotary-3141 Logo.png"
     alt="Rotary Logo"
     className="h-10 w-auto object-contain mb-1 pl-2"
   />

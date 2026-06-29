@@ -1,14 +1,66 @@
 import { useState } from 'react';
-import { Heart, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Heart, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BLOOD_GROUPS, URGENCY_LEVELS, Group } from '@/lib/mock-data';
+import { BLOOD_GROUPS, URGENCY_LEVELS } from '@/lib/mock-data';
+import { useToast } from '@/hooks/use-toast';
 
 export default function RequestBlood() {
   const [submitted, setSubmitted] = useState(false);
+  const [patientName, setPatientName] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [units, setUnits] = useState('');
+  const [urgency, setUrgency] = useState('');
+  const [hospital, setHospital] = useState('');
+  const [hospitalAddress, setHospitalAddress] = useState('');
+  const [attendantName, setAttendantName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const payload = {
+      patient_name: patientName,
+      blood_group: bloodGroup,
+      units: parseInt(units) || 1,
+      urgency,
+      hospital,
+      hospital_address: hospitalAddress,
+      attendant_name: attendantName,
+      phone,
+      status: 'pending'
+    };
+
+    fetch('/api/requests/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Submission failed');
+        return res.json();
+      })
+      .then(() => {
+        setSubmitted(true);
+      })
+      .catch(err => {
+        console.error(err);
+        toast({
+          variant: 'destructive',
+          title: 'Request Failed',
+          description: 'Could not submit blood request. Please check the inputs and try again.',
+        });
+        setIsSubmitting(false);
+      });
+  };
 
   if (submitted) {
     return (
@@ -45,24 +97,21 @@ export default function RequestBlood() {
 
         <Card>
           <CardContent className="p-6">
-            <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label htmlFor="patient">Patient Name *</Label>
-                  <Input id="patient" placeholder="Patient's full name" required />
+                  <Input 
+                    id="patient" 
+                    placeholder="Patient's full name" 
+                    value={patientName}
+                    onChange={e => setPatientName(e.target.value)}
+                    required 
+                  />
                 </div>
                 <div>
-                  <Label>Blood Requirement Type</Label>
-                  <Select>
-                    <SelectTrigger><SelectValue placeholder="Select group" /></SelectTrigger>
-                    <SelectContent>
-                      {Group.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Blood Group</Label>
-                  <Select>
+                  <Label>Blood Group *</Label>
+                  <Select value={bloodGroup} onValueChange={setBloodGroup} required>
                     <SelectTrigger><SelectValue placeholder="Select blood group" /></SelectTrigger>
                     <SelectContent>
                       {BLOOD_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
@@ -71,11 +120,20 @@ export default function RequestBlood() {
                 </div>
                 <div>
                   <Label htmlFor="units">Units Needed *</Label>
-                  <Input id="units" type="number" min={1} max={10} placeholder="e.g. 2" required />
+                  <Input 
+                    id="units" 
+                    type="number" 
+                    min={1} 
+                    max={10} 
+                    placeholder="e.g. 2" 
+                    value={units}
+                    onChange={e => setUnits(e.target.value)}
+                    required 
+                  />
                 </div>
                 <div>
                   <Label>Urgency Level *</Label>
-                  <Select required>
+                  <Select value={urgency} onValueChange={setUrgency} required>
                     <SelectTrigger><SelectValue placeholder="Select urgency" /></SelectTrigger>
                     <SelectContent>
                       {URGENCY_LEVELS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
@@ -84,28 +142,56 @@ export default function RequestBlood() {
                 </div>
                 <div>
                   <Label htmlFor="hospital">Hospital Name *</Label>
-                  <Input id="hospital" placeholder="Hospital name" required />
+                  <Input 
+                    id="hospital" 
+                    placeholder="Hospital name" 
+                    value={hospital}
+                    onChange={e => setHospital(e.target.value)}
+                    required 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="hospitalAddr">Hospital Address *</Label>
-                  <Input id="hospitalAddr" placeholder="Hospital address" required />
+                  <Input 
+                    id="hospitalAddr" 
+                    placeholder="Hospital address" 
+                    value={hospitalAddress}
+                    onChange={e => setHospitalAddress(e.target.value)}
+                    required 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="attendant">Attendant Name *</Label>
-                  <Input id="attendant" placeholder="Contact person name" required />
+                  <Input 
+                    id="attendant" 
+                    placeholder="Contact person name" 
+                    value={attendantName}
+                    onChange={e => setAttendantName(e.target.value)}
+                    required 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="phone">Mobile Number *</Label>
-                  <Input id="phone" placeholder="+91 98765 43210" required />
-                </div>
-                <div>
-                  <Label htmlFor="reqDate">Required By Date *</Label>
-                  <Input id="reqDate" type="date" required />
+                  <Input 
+                    id="phone" 
+                    placeholder="+91 98765 43210" 
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    required 
+                  />
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full gap-2" variant="destructive">
-                <Heart className="h-5 w-5 fill-current" /> Submit Blood Request
+              <Button type="submit" size="lg" className="w-full gap-2" variant="destructive" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" /> Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Heart className="h-5 w-5 fill-current" /> Submit Blood Request
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
