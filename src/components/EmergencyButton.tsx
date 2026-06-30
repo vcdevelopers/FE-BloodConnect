@@ -5,11 +5,11 @@ export function EmergencyButton() {
   return (
     <Link
       to="/request"
-      className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-full bg-primary px-5 py-3.5 text-primary-foreground shadow-2xl animate-pulse-emergency transition-transform active:scale-95 hover:scale-105 lg:bottom-6 lg:right-6"
+      className="fixed bottom-20 right-4 z-50 flex items-center gap-1.5 rounded-full bg-[#d32f2f] text-white px-6 py-2.5 shadow-xl transition-all duration-300 active:scale-95 hover:scale-105 lg:bottom-8 lg:right-8 border-[6px] border-[#d32f2f]/15 hover:border-[#d32f2f]/25"
       aria-label="Emergency Blood Request"
     >
-      <Heart className="h-5 w-5 fill-current" />
-      <span className="text-sm font-bold">SOS</span>
+      <Heart className="h-4.5 w-4.5 fill-current text-white" />
+      <span className="text-base font-bold tracking-wide text-white uppercase">SOS</span>
     </Link>
   );
 }
