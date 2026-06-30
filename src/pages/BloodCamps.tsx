@@ -1,12 +1,4 @@
-import { useState } from 'react';
-import { Calendar, MapPin, Users, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { mockCampaigns, MUMBAI_ZONES } from '@/lib/mock-data';
+// import { mockCampaigns, MUMBAI_ZONES } from '@/lib/mock-data';
 
 import { useState, useEffect } from 'react';
 import { Calendar, MapPin, Users, Clock, Loader2 } from 'lucide-react';

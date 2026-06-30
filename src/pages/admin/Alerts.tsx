@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,35 +18,96 @@ export default function AdminAlerts() {
   const [zone, setZone] = useState('All');
   const [channel, setChannel] = useState('sms');
   const [message, setMessage] = useState('');
+  const [templateId, setTemplateId] = useState('');
   const [sending, setSending] = useState(false);
   const { toast } = useToast();
 
-  const handleSend = (e: React.FormEvent) => {
+  const [donors, setDonors] = useState<any[]>([]);
+  const [selectedDonorIds, setSelectedDonorIds] = useState<string[]>([]);
+  
+  useEffect(() => {
+    fetch('/api/donors/')
+      .then(res => res.json())
+      .then(data => {
+        setDonors(data);
+      })
+      .catch(err => console.error('Error fetching donors:', err));
+  }, []);
+
+  const matchingDonors = donors.filter(d => {
+    if (bloodGroup !== 'All' && d.blood_group !== bloodGroup) return false;
+    if (zone !== 'All' && d.zone !== zone) return false;
+    return true;
+  });
+
+  useEffect(() => {
+    setSelectedDonorIds(matchingDonors.map(d => String(d.id)));
+  }, [bloodGroup, zone, donors]);
+
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
+    if (selectedDonorIds.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Recipients Selected",
+        description: "Please select at least one recipient to send the alert.",
+      });
+      return;
+    }
+
     setSending(true);
 
-    setTimeout(() => {
-      const newAlert = {
-        id: String(alerts.length + 1),
-        message,
-        type: channel as 'sms' | 'whatsapp' | 'email' | 'push',
-        bloodGroup: bloodGroup === 'All' ? undefined : bloodGroup,
-        zone: zone === 'All' ? undefined : zone,
-        recipients: Math.floor(Math.random() * 45) + 5,
-        sentAt: 'Just now',
-        status: 'sent' as const
-      };
-
-      setAlerts([newAlert, ...alerts]);
-      toast({
-        title: "Alert Broadcasted",
-        description: `Alert sent to ${newAlert.recipients} recipients via ${channel.toUpperCase()}`,
+    try {
+      const response = await fetch('/api/alerts/broadcast/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bloodGroup,
+          zone,
+          channel,
+          message,
+          templateId,
+          recipientIds: selectedDonorIds.map(id => parseInt(id)),
+        }),
       });
-      setMessage('');
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        const newAlert = {
+          id: String(alerts.length + 1),
+          message,
+          type: channel as 'sms' | 'whatsapp' | 'email' | 'push',
+          bloodGroup: bloodGroup === 'All' ? undefined : bloodGroup,
+          zone: zone === 'All' ? undefined : zone,
+          recipients: data.recipients,
+          sentAt: 'Just now',
+          status: 'sent' as const
+        };
+
+        setAlerts([newAlert, ...alerts]);
+        toast({
+          title: "Alert Broadcasted",
+          description: data.message || `Alert sent successfully to ${data.recipients} donors.`,
+        });
+        setMessage('');
+        setTemplateId('');
+      } else {
+        throw new Error(data.message || 'Failed to dispatch broadcast alert.');
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Broadcast Failed",
+        description: err.message || "Failed to connect to broadcast service.",
+      });
+    } finally {
       setSending(false);
-    }, 1200);
+    }
   };
 
   return (
@@ -92,6 +153,68 @@ export default function AdminAlerts() {
                 </Select>
               </div>
             </div>
+
+            {/* Recipients Selection List */}
+            <div className="border rounded-lg p-4 bg-muted/20 space-y-3">
+              <div className="flex items-center justify-between border-b pb-2">
+                <span className="text-sm font-semibold">Select Recipients ({matchingDonors.length} found)</span>
+                {matchingDonors.length > 0 && (
+                  <div className="flex gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDonorIds(matchingDonors.map(d => String(d.id)))}
+                      className="text-primary hover:underline bg-transparent border-none cursor-pointer p-0"
+                    >
+                      Select All
+                    </button>
+                    <span className="text-muted-foreground">|</span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDonorIds([])}
+                      className="text-primary hover:underline bg-transparent border-none cursor-pointer p-0"
+                    >
+                      Deselect All
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {matchingDonors.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-2 text-center">No active donors match the selected filters.</p>
+              ) : (
+                <div className="max-h-[160px] overflow-y-auto space-y-1.5 pr-1">
+                  {matchingDonors.map((donor) => {
+                    const isChecked = selectedDonorIds.includes(String(donor.id));
+                    return (
+                      <label key={donor.id} className="flex items-center gap-3 p-2 rounded hover:bg-muted/40 transition-colors cursor-pointer border text-xs bg-card">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            if (isChecked) {
+                              setSelectedDonorIds(selectedDonorIds.filter(id => id !== String(donor.id)));
+                            } else {
+                              setSelectedDonorIds([...selectedDonorIds, String(donor.id)]);
+                            }
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <div className="flex-1 flex items-center justify-between">
+                          <div>
+                            <span className="font-semibold text-foreground">{donor.name}</span>
+                            <span className="text-muted-foreground ml-2">({donor.blood_group} • {donor.zone})</span>
+                          </div>
+                          <span className="text-[11px] text-muted-foreground">
+                            {channel === 'email' ? (donor.email || 'No email') : (donor.phone || 'No phone')}
+                          </span>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             <div>
               <Label>Message</Label>
               <Textarea 
@@ -102,6 +225,19 @@ export default function AdminAlerts() {
                 required
               />
             </div>
+            {channel === 'sms' && (
+              <div>
+                <Label htmlFor="sms-template-id">DLT Template ID</Label>
+                <Input
+                  id="sms-template-id"
+                  placeholder="e.g. 1000123456789012345"
+                  value={templateId}
+                  onChange={e => setTemplateId(e.target.value)}
+                  className="max-w-md"
+                  required
+                />
+              </div>
+            )}
             <Button type="submit" className="gap-2" disabled={sending}>
               {sending ? (
                 <>

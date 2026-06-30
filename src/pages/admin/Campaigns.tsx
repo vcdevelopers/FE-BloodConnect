@@ -3,17 +3,97 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckCircle, Trash2, Loader2, Search } from 'lucide-react';
+import { CheckCircle, Trash2, Loader2, Search, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MUMBAI_ZONES } from '@/lib/mock-data';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function AdminCampaigns() {
   const [camps, setCamps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Create Camp States
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [organizer, setOrganizer] = useState('');
+  const [location, setLocation] = useState('');
+  const [campZone, setCampZone] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [slots, setSlots] = useState('100');
+  const [description, setDescription] = useState('');
+  const [creating, setCreating] = useState(false);
+
+  const handleCreateCamp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !organizer || !location || !campZone || !date || !time) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Fields',
+        description: 'Please fill in all required fields.',
+      });
+      return;
+    }
+    setCreating(true);
+
+    const payload = {
+      name,
+      organizer,
+      location,
+      zone: campZone,
+      date,
+      time,
+      slots: parseInt(slots) || 100,
+      description,
+      status: 'upcoming'
+    };
+
+    fetch('/api/camps/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to create camp');
+        return res.json();
+      })
+      .then(() => {
+        toast({
+          title: '✅ Camp Created',
+          description: `Blood camp "${name}" has been organized and is now live.`,
+        });
+        setAddModalOpen(false);
+        // Clear fields
+        setName('');
+        setOrganizer('');
+        setLocation('');
+        setCampZone('');
+        setDate('');
+        setTime('');
+        setSlots('100');
+        setDescription('');
+        // Reload list
+        fetchCamps();
+        setCreating(false);
+      })
+      .catch(err => {
+        console.error(err);
+        toast({
+          variant: 'destructive',
+          title: 'Creation Failed',
+          description: 'Could not create blood camp. Please try again.',
+        });
+        setCreating(false);
+      });
+  };
 
   // Filter States
   const [search, setSearch] = useState('');
@@ -111,11 +191,113 @@ export default function AdminCampaigns() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-2xl font-bold">Campaign Management</h2>
-        <div className="text-sm text-muted-foreground">
-          Showing {filtered.length} of {camps.length} campaigns
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Campaign Management</h2>
+          <div className="text-sm text-muted-foreground mt-0.5">
+            Showing {filtered.length} of {camps.length} campaigns
+          </div>
         </div>
+        
+        {/* Create Camp Dialog Modal */}
+        <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 bg-destructive hover:bg-destructive/90 text-white font-medium">
+              <Plus className="h-4 w-4" /> Create Camp
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-left">Organize Blood Camp</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleCreateCamp} className="space-y-4 pt-4 text-left">
+              <div>
+                <Label htmlFor="camp-name">Camp Name *</Label>
+                <Input 
+                  id="camp-name" 
+                  placeholder="e.g. Mega Blood Drive" 
+                  value={name} 
+                  onChange={e => setName(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div>
+                <Label htmlFor="camp-organizer">Organizer *</Label>
+                <Input 
+                  id="camp-organizer" 
+                  placeholder="e.g. Rotary Club" 
+                  value={organizer} 
+                  onChange={e => setOrganizer(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="camp-location">Location Address *</Label>
+                  <Input 
+                    id="camp-location" 
+                    placeholder="e.g. Community Center" 
+                    value={location} 
+                    onChange={e => setLocation(e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div>
+                  <Label>Area / Zone *</Label>
+                  <Select value={campZone} onValueChange={setCampZone} required>
+                    <SelectTrigger><SelectValue placeholder="Select zone" /></SelectTrigger>
+                    <SelectContent>
+                      {MUMBAI_ZONES.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="camp-date">Date *</Label>
+                  <Input 
+                    id="camp-date" 
+                    type="date" 
+                    value={date} 
+                    onChange={e => setDate(e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="camp-time">Time Range *</Label>
+                  <Input 
+                    id="camp-time" 
+                    placeholder="e.g. 9:00 AM - 5:00 PM" 
+                    value={time} 
+                    onChange={e => setTime(e.target.value)} 
+                    required 
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="camp-slots">Maximum Slots Capacity</Label>
+                <Input 
+                  id="camp-slots" 
+                  type="number" 
+                  value={slots} 
+                  onChange={e => setSlots(e.target.value)} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="camp-desc">Description</Label>
+                <Textarea 
+                  id="camp-desc" 
+                  placeholder="Details about the blood camp drive..." 
+                  value={description} 
+                  onChange={e => setDescription(e.target.value)} 
+                />
+              </div>
+              <Button type="submit" className="w-full gap-2 bg-destructive hover:bg-destructive/90 text-white font-medium" disabled={creating}>
+                {creating ? <><Loader2 className="h-4 w-4 animate-spin" /> Organizing...</> : <><CheckCircle className="h-4 w-4" /> Save &amp; Publish Camp</>}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filters row */}

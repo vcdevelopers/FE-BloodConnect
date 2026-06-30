@@ -6,10 +6,7 @@ import { Button } from '@/components/ui/button';
 const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Search Blood', href: '/search' },
-  { label: 'Donate Blood', href: '/donate' },
-  { label: 'Blood Camps', href: '/camps' },
   { label: 'Request Blood', href: '/request' },
-  { label: 'Organize Camp', href: '/organize' },
 ];
 
 export function Navbar() {
@@ -46,7 +43,7 @@ export function Navbar() {
             <Button variant="outline" size="sm" className="ml-2">Login</Button>
           </Link>
          <img
-    src="/static/Rotary-3141 Logo.png"
+    src={`${import.meta.env.BASE_URL}Rotary-3141 Logo.png`}
     alt="Rotary Logo"
     className="h-10 w-auto object-contain mb-1 pl-2"
   />

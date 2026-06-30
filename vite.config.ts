@@ -5,15 +5,16 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => ({
-  base: "/static/",
+  base: mode === "production" ? "/static/" : "/",
   server: {
     host: "::",
     port: 8080,
-    hmr: {
+    hmr: {  
       overlay: false,
     },
     proxy: {
       '/api': 'http://127.0.0.1:8000'
+      // '/api': 'https://api.bloodconnect.digielvestech.in'
     }
   },
   plugins: [

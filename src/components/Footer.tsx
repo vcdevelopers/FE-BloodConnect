@@ -10,7 +10,7 @@ export function Footer() {
             <div>
   {/* Rotary Logo */}
   <img
-    src="/static/Rotary-3141 Logo.png"
+    src={`${import.meta.env.BASE_URL}Rotary-3141 Logo.png`}
     alt="Rotary Logo"
     className="h-12 w-auto object-contain mb-1 pl-10"
   /></div>

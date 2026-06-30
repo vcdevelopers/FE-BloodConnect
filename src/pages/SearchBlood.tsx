@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Phone, Loader2, ChevronDown, ChevronUp, AlertTriangle, Clock, RefreshCw } from 'lucide-react';
+import { Search, MapPin, Phone, Loader2, ChevronDown, ChevronUp, AlertTriangle, Clock, RefreshCw, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BLOOD_GROUPS, MUMBAI_ZONES } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const formatTimestamp = (ts: string | null | undefined): string => {
   if (!ts) return 'Unknown';
@@ -38,6 +40,79 @@ export default function SearchBlood() {
   const [searched, setSearched] = useState(false);
   const [expandedBanks, setExpandedBanks] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
+
+  const [requestModalOpen, setRequestModalOpen] = useState<string | null>(null);
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+  const [dialogPatientName, setDialogPatientName] = useState('');
+  const [dialogBloodGroup, setDialogBloodGroup] = useState('');
+  const [dialogUnits, setDialogUnits] = useState('1');
+  const [dialogUrgency, setDialogUrgency] = useState('Normal');
+  const [dialogPhone, setDialogPhone] = useState('');
+  const [dialogAttendant, setDialogAttendant] = useState('');
+
+  const openRequestModal = (bb: any) => {
+    setDialogPatientName('');
+    setDialogBloodGroup(bloodGroup !== 'ALL' ? bloodGroup : '');
+    setDialogUnits('1');
+    setDialogUrgency('Normal');
+    setDialogPhone('');
+    setDialogAttendant('');
+    setRequestModalOpen(bb.id);
+  };
+
+  const handleDialogSubmit = (e: React.FormEvent, bb: any) => {
+    e.preventDefault();
+    if (!dialogPatientName || !dialogBloodGroup || !dialogUnits || !dialogUrgency || !dialogPhone || !dialogAttendant) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Fields',
+        description: 'Please fill in all required fields.',
+      });
+      return;
+    }
+    setSubmittingRequest(true);
+
+    const payload = {
+      patient_name: dialogPatientName,
+      blood_group: dialogBloodGroup,
+      units: parseInt(dialogUnits) || 1,
+      urgency: dialogUrgency,
+      hospital: bb.name,
+      hospital_address: bb.location || bb.district || 'Mumbai',
+      attendant_name: dialogAttendant,
+      phone: dialogPhone,
+      status: 'pending'
+    };
+
+    fetch('/api/requests/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Submission failed');
+        return res.json();
+      })
+      .then(() => {
+        toast({
+          title: '✅ Request Submitted!',
+          description: `Blood request for ${dialogPatientName} submitted to ${bb.name}.`,
+        });
+        setRequestModalOpen(null);
+        setSubmittingRequest(false);
+      })
+      .catch(err => {
+        console.error(err);
+        toast({
+          variant: 'destructive',
+          title: 'Request Failed',
+          description: 'Could not submit blood request. Please check inputs and try again.',
+        });
+        setSubmittingRequest(false);
+      });
+  };
 
   const toggleExpandBank = (bankId: string) => {
     setExpandedBanks(prev => ({
@@ -157,16 +232,20 @@ export default function SearchBlood() {
   });
 
   return (
-    <div className="py-8">
-      <div className="container">
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Search Blood Availability</h1>
-            <p className="mt-1 text-muted-foreground">Find blood banks and availability near you in Mumbai</p>
+    <div className="min-h-screen bg-gradient-to-b from-primary/5 via-background to-background py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              Search Blood Availability
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Find verified blood stock and contact blood banks in Mumbai
+            </p>
             {lastSynced && (
-              <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                Last synced: {lastSynced.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1">
+                <Clock className="h-3.5 w-3.5" />
+                Last sync: {lastSynced.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}
               </p>
             )}
           </div>
@@ -175,16 +254,16 @@ export default function SearchBlood() {
             size="sm"
             onClick={handleSync}
             disabled={syncing}
-            className="shrink-0 gap-2"
+            className="w-fit shrink-0 gap-2 border-primary/20 hover:bg-primary/5"
           >
             {syncing
-              ? <><Loader2 className="h-4 w-4 animate-spin" /> Syncing…</>
-              : <><RefreshCw className="h-4 w-4" /> Sync Live Data</>}
+              ? <><Loader2 className="h-4 w-4 animate-spin text-primary" /> Syncing…</>
+              : <><RefreshCw className="h-4 w-4 text-primary" /> Sync Live Data</>}
           </Button>
         </div>
 
         {/* Filters */}
-        <Card className="mb-8">
+        <Card className="border shadow-md bg-card/50 backdrop-blur">
           <CardContent className="p-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               <div>
@@ -333,9 +412,102 @@ export default function SearchBlood() {
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Phone className="h-3.5 w-3.5" /> {bb.contact || '+91 22 2640 0000'}
                       </div>
-                      <a href={`tel:${bb.contact || '+91 22 2640 0000'}`}>
-                        <Button size="sm">Call Bank</Button>
-                      </a>
+                      <div className="flex items-center gap-2">
+                        {/* Request Blood Dialog Modal */}
+                        <Dialog open={requestModalOpen === bb.id} onOpenChange={(isOpen) => isOpen ? openRequestModal(bb) : setRequestModalOpen(null)}>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="text-destructive border-destructive hover:bg-destructive/10">Request Blood</Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle className="text-xl font-bold text-left">Request Blood from {bb.name}</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={(e) => handleDialogSubmit(e, bb)} className="space-y-4 pt-4 text-left">
+                              <div>
+                                <Label htmlFor="dialog-patient">Patient Name *</Label>
+                                <Input 
+                                  id="dialog-patient" 
+                                  placeholder="Patient's full name" 
+                                  value={dialogPatientName}
+                                  onChange={e => setDialogPatientName(e.target.value)}
+                                  required 
+                                />
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label>Blood Group *</Label>
+                                  <Select value={dialogBloodGroup} onValueChange={setDialogBloodGroup} required>
+                                    <SelectTrigger><SelectValue placeholder="Select group" /></SelectTrigger>
+                                    <SelectContent>
+                                      {BLOOD_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label htmlFor="dialog-units">Units Needed *</Label>
+                                  <Input 
+                                    id="dialog-units" 
+                                    type="number" 
+                                    min={1} 
+                                    max={10} 
+                                    value={dialogUnits}
+                                    onChange={e => setDialogUnits(e.target.value)}
+                                    required 
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label>Urgency Level *</Label>
+                                  <Select value={dialogUrgency} onValueChange={setDialogUrgency} required>
+                                    <SelectTrigger><SelectValue placeholder="Select urgency" /></SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Normal">Normal</SelectItem>
+                                      <SelectItem value="Urgent">Urgent</SelectItem>
+                                      <SelectItem value="Emergency">Emergency</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label htmlFor="dialog-phone">Mobile Number *</Label>
+                                  <Input 
+                                    id="dialog-phone" 
+                                    placeholder="+91 xxxxx xxxxx" 
+                                    value={dialogPhone}
+                                    onChange={e => setDialogPhone(e.target.value)}
+                                    required 
+                                  />
+                                </div>
+                              </div>
+                              <div>
+                                <Label htmlFor="dialog-attendant">Attendant Name *</Label>
+                                <Input 
+                                  id="dialog-attendant" 
+                                  placeholder="Contact person name" 
+                                  value={dialogAttendant}
+                                  onChange={e => setDialogAttendant(e.target.value)}
+                                  required 
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="dialog-hospital">Hospital Name</Label>
+                                <Input id="dialog-hospital" value={bb.name} disabled className="bg-muted" />
+                              </div>
+                              <div>
+                                <Label htmlFor="dialog-hospital-addr">Hospital Address</Label>
+                                <Input id="dialog-hospital-addr" value={bb.location || bb.district || ''} disabled className="bg-muted" />
+                              </div>
+                              <Button type="submit" className="w-full gap-2 bg-destructive hover:bg-destructive/90 text-white font-medium" disabled={submittingRequest}>
+                                {submittingRequest ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : <><Heart className="h-4 w-4 fill-current" /> Submit Request</>}
+                              </Button>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
+                        
+                        <a href={`tel:${bb.contact || '+91 22 2640 0000'}`}>
+                          <Button size="sm">Call Bank</Button>
+                        </a>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

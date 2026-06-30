@@ -4,7 +4,7 @@ export type BloodGroup = typeof BLOOD_GROUPS[number];
 
 export const MUMBAI_ZONES = [
   'South Mumbai', 'Dadar / Worli', 'Bandra / Khar', 'Andheri',
-  'Goregaon / Malad', 'Borivali', 'Navi Mumbai', 'Thane'
+  'Goregaon / Malad', 'Borivali', 'Navi Mumbai', 'Thane', 'Palghar'
 ] as const;
 
 export const URGENCY_LEVELS = ['Normal', 'Urgent', 'Emergency'] as const;

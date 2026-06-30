@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   // Login Form States
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,20 +22,33 @@ export default function Login() {
   const [regPassword, setRegPassword] = useState('');
   const [regConfirm, setRegConfirm] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.toLowerCase() === 'admin@mumbaibloodconnect.org' && password === 'admin') {
-      toast({
-        title: "Login Successful",
-        description: "Welcome to Mumbai Blood Connect Admin Console.",
+    try {
+      const response = await fetch('/api/auth/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
-      localStorage.setItem('admin_token', 'true');
-      navigate('/admin');
-    } else {
+
+      const data = await response.json();
+      if (response.ok && data.status === 'success') {
+        toast({
+          title: "Login Successful",
+          description: "Welcome to Mumbai Blood Connect Admin Console.",
+        });
+        localStorage.setItem('admin_token', 'true');
+        navigate('/admin');
+      } else {
+        throw new Error(data.message || 'Invalid email or password.');
+      }
+    } catch (err: any) {
       toast({
         variant: "destructive",
         title: "Authentication Failed",
-        description: "Invalid email or password. Please use admin credentials to access the console.",
+        description: err.message || "Failed to connect to authentication server. Please try again.",
       });
     }
   };
@@ -64,7 +77,7 @@ export default function Login() {
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 h-[100px] w-[250px] rounded-xl overflow-hidden">
             <img
-              src="/static/Rotary-3141 Logo.png"
+              src={`${import.meta.env.BASE_URL}Rotary-3141 Logo.png`}
               alt="Rotary logo"
               className="h-full w-full object-contain"
             />
@@ -87,24 +100,24 @@ export default function Login() {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
                     <Label htmlFor="login-email">Email</Label>
-                    <Input 
+                    <Input
                       id="login-email"
-                      type="email" 
-                      placeholder="your@email.com" 
+                      type="email"
+                      placeholder="your@email.com"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="login-password">Password</Label>
-                    <Input 
+                    <Input
                       id="login-password"
-                      type="password" 
-                      placeholder="••••••••" 
+                      type="password"
+                      placeholder="••••••••"
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                   <Button type="submit" className="w-full gap-2 bg-red-600 hover:bg-red-700">
@@ -118,45 +131,45 @@ export default function Login() {
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div>
                     <Label htmlFor="reg-name">Full Name</Label>
-                    <Input 
+                    <Input
                       id="reg-name"
-                      placeholder="Your full name" 
+                      placeholder="Your full name"
                       value={regName}
                       onChange={e => setRegName(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="reg-email">Email</Label>
-                    <Input 
+                    <Input
                       id="reg-email"
-                      type="email" 
-                      placeholder="your@email.com" 
+                      type="email"
+                      placeholder="your@email.com"
                       value={regEmail}
                       onChange={e => setRegEmail(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="reg-password">Password</Label>
-                    <Input 
+                    <Input
                       id="reg-password"
-                      type="password" 
-                      placeholder="••••••••" 
+                      type="password"
+                      placeholder="••••••••"
                       value={regPassword}
                       onChange={e => setRegPassword(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                   <div>
                     <Label htmlFor="reg-confirm">Confirm Password</Label>
-                    <Input 
+                    <Input
                       id="reg-confirm"
-                      type="password" 
-                      placeholder="••••••••" 
+                      type="password"
+                      placeholder="••••••••"
                       value={regConfirm}
                       onChange={e => setRegConfirm(e.target.value)}
-                      required 
+                      required
                     />
                   </div>
                   <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">Create Account</Button>

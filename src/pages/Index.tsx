@@ -7,8 +7,8 @@ import { mockStats, mockCampaigns } from '@/lib/mock-data';
 
 const steps = [
   { step: 1, title: 'Search Blood', description: 'Find available blood in hospitals and blood banks near you.', icon: Search },
-  { step: 2, title: 'Request or Donate', description: 'Submit a blood request or register as a donor to help others.', icon: Heart },
-  { step: 3, title: 'Save Lives', description: 'Your donation reaches the patient and saves a life.', icon: CheckCircle },
+  { step: 2, title: 'Submit Request', description: 'Submit a blood request for emergency needs and find matches.', icon: Heart },
+  { step: 3, title: 'Contact Bank', description: 'Connect with the blood bank directly to obtain the units.', icon: CheckCircle },
 ];
 
 export default function Index() {
@@ -87,34 +87,10 @@ export default function Index() {
                   <Heart className="h-5 w-5 fill-current" /> Request Blood
                 </Button>
               </Link>
-              <Link to="/donate">
-                <Button size="lg" variant="outline" className="w-full gap-2 sm:w-auto">
-                  <Droplets className="h-5 w-5" /> Donate Blood
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Stats */}
-      <section className="border-b py-12">
-        <div className="container">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {stats.map((stat) => (
-              <Card key={stat.label} className="text-center">
-                <CardContent className="p-6">
-                  <stat.icon className={`mx-auto mb-2 h-8 w-8 ${stat.color}`} />
-                  <div className="text-3xl font-extrabold">{stat.value}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
+      </section>      {/* How It Works */}
       <section className="py-16">
         <div className="container">
           <div className="mb-10 text-center">
@@ -136,69 +112,43 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Upcoming Camps */}
-      <section className="border-t bg-muted/30 py-16">
-        <div className="container">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-bold">Upcoming Blood Camps</h2>
-              <p className="mt-1 text-muted-foreground">Register and donate near you</p>
+      {/* Upcoming Blood Donation Camps */}
+      {camps.filter(c => c.status === 'upcoming').length > 0 && (
+        <section className="py-16 bg-muted/30 border-t">
+          <div className="container">
+            <div className="mb-10 text-center">
+              <h2 className="text-3xl font-bold">Upcoming Blood Donation Camps</h2>
+              <p className="mt-2 text-muted-foreground">Find and register for active blood donation drives near you in Mumbai</p>
             </div>
-            <Link to="/camps" className="hidden items-center gap-1 text-sm font-medium text-primary hover:underline sm:flex">
-              View All <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          {loading ? (
-            <div className="flex h-20 items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {displayedCamps.map((camp) => {
-                const booked = camp.slots_booked !== undefined ? camp.slots_booked : camp.slotsBooked || 0;
-                return (
-                  <Card key={camp.id} className="overflow-hidden">
-                    <div className="h-2 bg-primary" />
-                    <CardContent className="p-5">
-                      <div className="mb-2 text-xs font-medium text-primary">{camp.date} • {camp.time}</div>
-                      <h3 className="mb-1 text-lg font-bold">{camp.name}</h3>
-                      <p className="mb-3 text-sm text-muted-foreground">{camp.organizer} • {camp.location}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">{booked}/{camp.slots} registered</span>
-                        <Link to="/camps">
-                          <Button size="sm" variant="outline">Register</Button>
-                        </Link>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
+              {camps.filter(c => c.status === 'upcoming').map((c) => (
+                <Card key={c.id} className="overflow-hidden border shadow-md hover:shadow-lg transition-shadow bg-card/60 backdrop-blur">
+                  <CardContent className="p-6 flex flex-col justify-between h-full space-y-4">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-xs text-primary font-semibold mb-2 bg-primary/10 w-fit px-2 py-0.5 rounded-full">
+                        <Calendar className="h-3 w-3" /> {c.date}
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      <h3 className="font-bold text-lg leading-tight text-foreground">{c.name}</h3>
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{c.description || 'No description provided.'}</p>
+                    </div>
+                    <div className="border-t pt-4 space-y-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground">Location:</span> {c.location} • {c.zone}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground">Time:</span> {c.time}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground">Organizer:</span> {c.organizer}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          )}
-          <Link to="/camps" className="mt-6 flex items-center justify-center gap-1 text-sm font-medium text-primary hover:underline sm:hidden">
-            View All Camps <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16">
-        <div className="container">
-          <Card className="overflow-hidden bg-gradient-to-r from-primary to-accent text-primary-foreground">
-            <CardContent className="p-8 text-center md:p-12">
-              <h2 className="mb-4 text-3xl font-extrabold md:text-4xl">Become a Lifesaver Today</h2>
-              <p className="mx-auto mb-6 max-w-xl text-primary-foreground/80">
-                Register as a blood donor and join thousands of Mumbaikars who are ready to help in emergencies. Your blood can save up to 3 lives.
-              </p>
-              <Link to="/donate">
-                <Button size="lg" variant="secondary" className="gap-2">
-                  <Heart className="h-5 w-5" /> Register as Donor
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

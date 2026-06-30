@@ -67,34 +67,55 @@ export default function AdminBloodBanks() {
   };
 
   const getAggregatedInventory = (inventory: any[]) => {
-    const map: Record<string, number> = {};
-    
-    // Seed standard blood groups to 0 so they always show
+    const map: Record<string, { group: string; component: string; units: number }> = {};
+
+    const bloodComponents = ['Whole Blood', 'PRBC'];
     BLOOD_GROUPS.forEach(g => {
-      map[g] = 0;
+      bloodComponents.forEach(comp => {
+        const key = `${comp}::${g}`;
+        map[key] = { group: g, component: comp, units: 0 };
+      });
     });
 
-    // Also seed Platelets and Plasma defaults
-    map['Single Donor Platelets'] = 0;
-    map['Random Donor Platelets (RDP)'] = 0;
-    map['Fresh Frozen Plasma (FFP)'] = 0;
-    map['Liquid Plasma'] = 0;
-    map['Single Donor Plasma'] = 0;
-    map['Cryoprecipitate'] = 0;
-    
+    const specialComponents = [
+      'Single Donor Platelets',
+      'Random Donor Platelets (RDP)',
+      'Fresh Frozen Plasma (FFP)',
+      'Liquid Plasma',
+      'Single Donor Plasma',
+      'Cryoprecipitate',
+      'Bombay Blood Group (+)',
+      'Bombay Blood Group (-)',
+    ];
+    specialComponents.forEach(comp => {
+      map[`special::${comp}`] = { group: comp, component: comp, units: 0 };
+    });
+
     if (inventory) {
       inventory.forEach(item => {
-        let key = item.group;
-        if (key === 'All') {
-          key = item.component;
-        }
-        if (key) {
-          map[key] = (map[key] || 0) + (item.units || 0);
+        if (item.group === 'All') {
+          const key = `special::${item.component}`;
+          if (map[key] !== undefined) {
+            map[key].units += item.units || 0;
+          }
+        } else {
+          const comp = item.component || 'Whole Blood';
+          const key = `${comp}::${item.group}`;
+          if (map[key] !== undefined) {
+            map[key].units += item.units || 0;
+          }
         }
       });
     }
 
-    return Object.entries(map).map(([group, units]) => ({ group, units }));
+    return Object.values(map).map(({ group, component, units }) => ({
+      group,
+      component,
+      units,
+      label: component === 'Whole Blood' || component === 'PRBC'
+        ? `${group} (${component})`
+        : group,
+    }));
   };
 
   const filteredBloodBanks = bloodBanks.filter(bb => 
@@ -168,31 +189,13 @@ export default function AdminBloodBanks() {
                       <AlertTriangle className="h-4 w-4" /> No blood units currently available. Click "Sync Stock" or update manually.
                     </p>
                   ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {availableInv.map((inv) => {
-                        const isComponent = inv.group.includes('Platelets') || inv.group.includes('Plasma') || inv.group === 'Cryoprecipitate';
-                        let badgeClass = "";
-                        
-                        if (isComponent) {
-                          // Style for Platelets / Plasma components
-                          badgeClass = "bg-violet-600 hover:bg-violet-700 text-white border-transparent gap-1 px-2.5 py-1 text-xs font-medium";
-                        } else if (inv.units < 10) {
-                          // Critical stock for standard blood groups
-                          badgeClass = "bg-red-500 hover:bg-red-600 text-white border-transparent gap-1 px-2.5 py-1 text-xs font-medium";
-                        } else {
-                          // Normal/Healthy stock for standard blood groups
-                          badgeClass = "bg-emerald-600 hover:bg-emerald-700 text-white border-transparent gap-1 px-2.5 py-1 text-xs font-medium";
-                        }
-
-                        return (
-                          <Badge 
-                            key={inv.group} 
-                            className={badgeClass}
-                          >
-                            <Droplets className="h-3 w-3 fill-current" /> {inv.group}: {inv.units} units
-                          </Badge>
-                        );
-                      })}
+                    <div className="rounded-md border divide-y text-sm overflow-hidden bg-background max-w-md">
+                      {availableInv.map((inv) => (
+                        <div key={inv.label} className="flex items-center justify-between px-3 py-1.5 hover:bg-muted/30 transition-colors">
+                          <span className="text-foreground/75 text-xs">{inv.label}</span>
+                          <span className="font-semibold text-foreground text-xs tabular-nums">{inv.units} units</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -202,7 +205,7 @@ export default function AdminBloodBanks() {
                   <div className="mt-4 pt-3 border-t">
                     <button 
                       onClick={() => toggleExpandBank(bb.id)}
-                      className="text-xs text-muted-foreground hover:text-primary hover:bg-transparent transition-colors p-0 h-auto gap-1 flex items-center bg-transparent border-0 outline-none"
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors p-0 h-auto gap-1 flex items-center bg-transparent border-0 outline-none"
                     >
                       {isExpanded ? (
                         <>
@@ -215,14 +218,14 @@ export default function AdminBloodBanks() {
                       )}
                     </button>
                     {isExpanded && (
-                      <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      <div className="flex flex-wrap gap-1.5 mt-2">
                         {unavailableInv.map((inv) => (
                           <Badge 
-                            key={inv.group} 
+                            key={inv.label} 
                             variant="outline" 
-                            className="text-[10px] text-muted-foreground/70 border-dashed opacity-75 gap-0.5"
+                            className="text-muted-foreground/60 border-muted text-[10px] px-2 py-0.5"
                           >
-                            {inv.group}: 0 units
+                            {inv.label}
                           </Badge>
                         ))}
                       </div>

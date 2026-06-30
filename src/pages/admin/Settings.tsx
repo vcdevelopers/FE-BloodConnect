@@ -10,40 +10,6 @@ export default function AdminSettings() {
       <h2 className="text-2xl font-bold">Settings</h2>
 
       <Card>
-        <CardHeader><CardTitle>Notification Settings</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">SMS Alerts</p>
-              <p className="text-sm text-muted-foreground">Send alerts via SMS to donors</p>
-            </div>
-            <Switch />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">WhatsApp Alerts</p>
-              <p className="text-sm text-muted-foreground">Send alerts via WhatsApp</p>
-            </div>
-            <Switch />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Email Alerts</p>
-              <p className="text-sm text-muted-foreground">Send alerts via Email</p>
-            </div>
-            <Switch defaultChecked />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Emergency Broadcast</p>
-              <p className="text-sm text-muted-foreground">Enable emergency broadcast for rare blood types</p>
-            </div>
-            <Switch defaultChecked />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
         <CardHeader><CardTitle>Platform Settings</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div>

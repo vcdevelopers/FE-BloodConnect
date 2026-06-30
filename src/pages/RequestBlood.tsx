@@ -81,45 +81,55 @@ export default function RequestBlood() {
   }
 
   return (
-    <div className="py-8">
-      <div className="container max-w-2xl">
-        <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-primary">Emergency Blood Request</h3>
-              <p className="text-sm text-muted-foreground">
-                Fill this form for urgent blood needs. Our system will alert matching donors in your area automatically.
-              </p>
-            </div>
-          </div>
+    <div className="min-h-[90vh] bg-gradient-to-b from-primary/5 via-background to-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-2xl space-y-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Submit a Blood Request
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We will alert verified matching donors in your area immediately
+          </p>
         </div>
 
-        <Card>
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2">
+        <Card className="border shadow-lg backdrop-blur bg-card/50">
+          <CardContent className="p-8">
+            <div className="mb-6 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
                 <div>
-                  <Label htmlFor="patient">Patient Name *</Label>
+                  <h3 className="font-semibold text-destructive text-sm">Emergency Verification Notice</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Please ensure patient details are accurate. Hospital name and mobile contacts are verified before matching alerts are broadcast.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="patient" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Patient Name *</Label>
                   <Input 
                     id="patient" 
                     placeholder="Patient's full name" 
                     value={patientName}
                     onChange={e => setPatientName(e.target.value)}
+                    className="h-10 text-sm"
                     required 
                   />
                 </div>
-                <div>
-                  <Label>Blood Group *</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Blood Group *</Label>
                   <Select value={bloodGroup} onValueChange={setBloodGroup} required>
-                    <SelectTrigger><SelectValue placeholder="Select blood group" /></SelectTrigger>
+                    <SelectTrigger className="h-10 text-sm"><SelectValue placeholder="Select blood group" /></SelectTrigger>
                     <SelectContent>
                       {BLOOD_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="units">Units Needed *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="units" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Units Needed *</Label>
                   <Input 
                     id="units" 
                     type="number" 
@@ -128,64 +138,69 @@ export default function RequestBlood() {
                     placeholder="e.g. 2" 
                     value={units}
                     onChange={e => setUnits(e.target.value)}
+                    className="h-10 text-sm"
                     required 
                   />
                 </div>
-                <div>
-                  <Label>Urgency Level *</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Urgency Level *</Label>
                   <Select value={urgency} onValueChange={setUrgency} required>
-                    <SelectTrigger><SelectValue placeholder="Select urgency" /></SelectTrigger>
+                    <SelectTrigger className="h-10 text-sm"><SelectValue placeholder="Select urgency" /></SelectTrigger>
                     <SelectContent>
                       {URGENCY_LEVELS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="hospital">Hospital Name *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="hospital" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hospital Name *</Label>
                   <Input 
                     id="hospital" 
                     placeholder="Hospital name" 
                     value={hospital}
                     onChange={e => setHospital(e.target.value)}
+                    className="h-10 text-sm"
                     required 
                   />
                 </div>
-                <div>
-                  <Label htmlFor="hospitalAddr">Hospital Address *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="hospitalAddr" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hospital Address *</Label>
                   <Input 
                     id="hospitalAddr" 
                     placeholder="Hospital address" 
                     value={hospitalAddress}
                     onChange={e => setHospitalAddress(e.target.value)}
+                    className="h-10 text-sm"
                     required 
                   />
                 </div>
-                <div>
-                  <Label htmlFor="attendant">Attendant Name *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="attendant" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Attendant Name *</Label>
                   <Input 
                     id="attendant" 
                     placeholder="Contact person name" 
                     value={attendantName}
                     onChange={e => setAttendantName(e.target.value)}
+                    className="h-10 text-sm"
                     required 
                   />
                 </div>
-                <div>
-                  <Label htmlFor="phone">Mobile Number *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mobile Number *</Label>
                   <Input 
                     id="phone" 
                     placeholder="+91 98765 43210" 
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
+                    className="h-10 text-sm"
                     required 
                   />
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full gap-2" variant="destructive" disabled={isSubmitting}>
+              <Button type="submit" size="lg" className="w-full gap-2 h-12 bg-destructive hover:bg-destructive/90 text-white font-semibold transition-transform active:scale-[0.98]" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="h-5 w-5 animate-spin" /> Submitting...
+                    <Loader2 className="h-5 w-5 animate-spin" /> Submitting Request...
                   </>
                 ) : (
                   <>

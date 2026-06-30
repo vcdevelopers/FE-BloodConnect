@@ -3,17 +3,93 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trash2, Loader2, Check, Search } from 'lucide-react';
+import { Trash2, Loader2, Check, Search, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BLOOD_GROUPS, MUMBAI_ZONES } from '@/lib/mock-data';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function AdminDonors() {
   const [donors, setDonors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Add Donor States
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [donorZone, setDonorZone] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('Male');
+  const [registering, setRegistering] = useState(false);
+
+  const handleRegisterDonor = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !phone || !email || !bloodGroup || !donorZone || !age) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Fields',
+        description: 'Please fill in all required fields.',
+      });
+      return;
+    }
+    setRegistering(true);
+
+    const payload = {
+      name,
+      phone,
+      email,
+      blood_group: bloodGroup,
+      zone: donorZone,
+      age: parseInt(age) || 30,
+      gender,
+      status: 'active'
+    };
+
+    fetch('/api/donors/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Registration failed');
+        return res.json();
+      })
+      .then(() => {
+        toast({
+          title: '✅ Donor Registered',
+          description: `Donor profile for ${name} created successfully.`,
+        });
+        setAddModalOpen(false);
+        // Clear fields
+        setName('');
+        setPhone('');
+        setEmail('');
+        setBloodGroup('');
+        setDonorZone('');
+        setAge('');
+        setGender('Male');
+        // Reload list
+        fetchDonors();
+        setRegistering(false);
+      })
+      .catch(err => {
+        console.error(err);
+        toast({
+          variant: 'destructive',
+          title: 'Registration Failed',
+          description: 'Could not register donor. Please check inputs and try again.',
+        });
+        setRegistering(false);
+      });
+  };
 
   // Filter States
   const [search, setSearch] = useState('');
@@ -87,11 +163,111 @@ export default function AdminDonors() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-2xl font-bold">Donor Management</h2>
-        <div className="text-sm text-muted-foreground">
-          Showing {filtered.length} of {donors.length} donors
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Donor Management</h2>
+          <div className="text-sm text-muted-foreground mt-0.5">
+            Showing {filtered.length} of {donors.length} donors
+          </div>
         </div>
+        
+        {/* Register Donor Dialog Modal */}
+        <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 bg-destructive hover:bg-destructive/90 text-white font-medium">
+              <Plus className="h-4 w-4" /> Register Donor
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-left">Register New Donor</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleRegisterDonor} className="space-y-4 pt-4 text-left">
+              <div>
+                <Label htmlFor="add-name">Full Name *</Label>
+                <Input 
+                  id="add-name" 
+                  placeholder="e.g. John Doe" 
+                  value={name} 
+                  onChange={e => setName(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="add-phone">Mobile Number *</Label>
+                  <Input 
+                    id="add-phone" 
+                    placeholder="e.g. +91 98765 43210" 
+                    value={phone} 
+                    onChange={e => setPhone(e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="add-email">Email Address *</Label>
+                  <Input 
+                    id="add-email" 
+                    type="email" 
+                    placeholder="e.g. john@example.com" 
+                    value={email} 
+                    onChange={e => setEmail(e.target.value)} 
+                    required 
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Blood Group *</Label>
+                  <Select value={bloodGroup} onValueChange={setBloodGroup} required>
+                    <SelectTrigger><SelectValue placeholder="Select group" /></SelectTrigger>
+                    <SelectContent>
+                      {BLOOD_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Area / Zone *</Label>
+                  <Select value={donorZone} onValueChange={setDonorZone} required>
+                    <SelectTrigger><SelectValue placeholder="Select zone" /></SelectTrigger>
+                    <SelectContent>
+                      {MUMBAI_ZONES.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="add-age">Age *</Label>
+                  <Input 
+                    id="add-age" 
+                    type="number" 
+                    min={18} 
+                    max={65} 
+                    placeholder="e.g. 25" 
+                    value={age} 
+                    onChange={e => setAge(e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div>
+                  <Label>Gender *</Label>
+                  <Select value={gender} onValueChange={setGender}>
+                    <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button type="submit" className="w-full gap-2 bg-destructive hover:bg-destructive/90 text-white font-medium" disabled={registering}>
+                {registering ? <><Loader2 className="h-4 w-4 animate-spin" /> Registering...</> : <><Check className="h-4 w-4" /> Save Profile</>}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filters row */}
