@@ -7,13 +7,23 @@ export function Footer() {
       <div className="container py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div>
-  {/* Rotary Logo */}
-  <img
-    src={`${import.meta.env.BASE_URL}rotary1.jpg`}
-    alt="Rotary Logo"
-    className="h-12 w-auto object-contain mb-1 pl-10"
-  /></div>
+            <div className="mb-4 flex flex-wrap items-center sm:gap-2">
+              <img
+                src={`${import.meta.env.BASE_URL}Regal Logo.png`}
+                alt="Regal Logo"
+                className="h-12 w-auto object-contain sm:h-14"
+              />
+              <img
+                src={`${import.meta.env.BASE_URL}Create Lasting Impact.png`}
+                alt="Create Lasting Impact Logo"
+                className="h-12 w-auto object-contain sm:h-14"
+              />
+              <img
+                src={`${import.meta.env.BASE_URL}Rotary.png`}
+                alt="Rotary Logo"
+                className="h-12 w-auto object-contain sm:h-14"
+              />
+            </div>
             <div className="flex items-center gap-2 mb-4">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Droplets className="h-4 w-4 text-primary-foreground" />
