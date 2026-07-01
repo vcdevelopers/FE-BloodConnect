@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Droplets } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const navLinks = [
@@ -15,18 +15,40 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="container flex h-14 items-center justify-between lg:h-16">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary lg:h-9 lg:w-9">
-            <Droplets className="h-4 w-4 text-primary-foreground lg:h-5 lg:w-5" />
-          </div>
-          <span className="text-base font-bold tracking-tight lg:text-lg">
-            <span className="text-primary">Mumbai Blood</span>Connect
-          </span>
+      {/* Expanded header desktop height to give the upscaled logo plenty of breathing room */}
+      <div className="container flex h-16 items-center justify-between lg:h-24">
+        
+        {/* Left branding area */}
+        <Link to="/" className="flex items-center">
           
+          <img
+              src={`${import.meta.env.BASE_URL}Regal Logo.png`}
+              alt="Regal Logo"
+              className="h-10 w-auto object-contain lg:h-[4.5rem]" 
+            />
+            <img
+              src={`${import.meta.env.BASE_URL}Create Lasting Impact.png`}
+              alt="Create Lasting Impact Logo"
+              className="h-10 w-auto object-contain lg:h-[4.5rem]"
+            />
+            {/* Force-scaling the Rotary logo by 150% using Tailwind's transform tools.
+              If it is STILL too small, change "lg:scale-150" below to "lg:scale-[1.75]" or "lg:scale-[2]"
+            */}
+            <img
+              src={`${import.meta.env.BASE_URL}Rotary.png`}
+              alt="Rotary Logo"
+              className="h-12 w-auto object-contain transform origin-center scale-110 lg:h-[4.5rem] lg:scale-150 lg:mx-4"
+            />
+          
+          {/* Vertical line and all three logos */}
+          {/* <div className="flex items-center 6 border-l-2 pl-4 dark:border-muted">
+            <span className="text-base font-bold tracking-tight lg:text-2xl whitespace-nowrap">
+            <span className="text-primary">Mumbai Blood</span> Tracker
+          </span>
+          </div> */}
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop nav — Clean right side */}
         <nav className="hidden items-center gap-1 lg:flex">
           {navLinks.map((link) => (
             <Link
@@ -42,11 +64,6 @@ export function Navbar() {
           <Link to="/login">
             <Button variant="outline" size="sm" className="ml-2">Login</Button>
           </Link>
-         <img
-    src={`${import.meta.env.BASE_URL}Rotary-3141 Logo.png`}
-    alt="Rotary Logo"
-    className="h-10 w-auto object-contain mb-1 pl-2"
-  />
         </nav>
 
         {/* Mobile toggle */}

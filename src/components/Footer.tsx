@@ -10,7 +10,7 @@ export function Footer() {
             <div>
   {/* Rotary Logo */}
   <img
-    src={`${import.meta.env.BASE_URL}Rotary-3141 Logo.png`}
+    src={`${import.meta.env.BASE_URL}rotary1.jpg`}
     alt="Rotary Logo"
     className="h-12 w-auto object-contain mb-1 pl-10"
   /></div>
@@ -18,7 +18,7 @@ export function Footer() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Droplets className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-bold">Mumbai Blood Connect</span>
+              <span className="font-bold">Mumbai Blood Tracker</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Connecting blood donors with those in need across Mumbai. Every drop counts.

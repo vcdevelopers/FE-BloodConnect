@@ -73,17 +73,31 @@ export default function Login() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center py-8">
       <div className="container max-w-md">
-        {/* Header with Rotary logo */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 h-[100px] w-[250px] rounded-xl overflow-hidden">
+        {/* Header section with corrected spacing constraints */}
+        <div className="mb-6 text-center">
+          {/* Removed h-[400px] box restrictions to close the dead spacing gap completely */}
+          <div className="flex items-center justify-center mb-0">
+             <img
+              src={`${import.meta.env.BASE_URL}regal.jpg`}
+              alt="Regal logo"
+              className="h-20 w-auto object-contain sm:h-21"
+            />
+           
             <img
-              src={`${import.meta.env.BASE_URL}Rotary-3141 Logo.png`}
-              alt="Rotary logo"
-              className="h-full w-full object-contain"
+              src={`${import.meta.env.BASE_URL}Create Lasting Impact.png`}
+              alt="lasting impact logo"
+              className="h-22 w-auto object-contain sm:h-20"
             />
           </div>
-          <h1 className="text-2xl font-bold">Mumbai Blood Connect</h1>
-          <p className="text-muted-foreground">Sign in to manage your account</p>
+          <div className="flex items-center justify-center mb-4">
+            <img
+              src={`${import.meta.env.BASE_URL}rotary1.jpg`}
+              alt="Rotary logo"
+              className="h-22 w-auto object-contain sm:h-14"
+            />
+          </div>
+          <h1 className="text-2xl font-bold">Mumbai Blood Tracker</h1>
+          <p className="text-muted-foreground mt-1">Sign in to manage your account</p>
         </div>
 
         {/* Card with Login/Register */}

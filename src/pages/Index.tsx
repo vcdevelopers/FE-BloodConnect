@@ -67,7 +67,7 @@ export default function Index() {
         <div className="container">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-              <Droplets className="h-4 w-4" /> Mumbai's Blood Donation Platform
+              <Droplets className="h-4 w-4" /> Mumbai's Blood Tracker
             </div>
             <h1 className="mb-6 text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">
               Find Blood. Save Lives.{' '}
