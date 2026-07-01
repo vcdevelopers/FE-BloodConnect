@@ -15,9 +15,10 @@ export default function RequestBlood() {
   const [units, setUnits] = useState('');
   const [urgency, setUrgency] = useState('');
   const [hospital, setHospital] = useState('');
-  const [hospitalAddress, setHospitalAddress] = useState('');
   const [attendantName, setAttendantName] = useState('');
   const [phone, setPhone] = useState('');
+  const [isWhatsappSame, setIsWhatsappSame] = useState('yes');
+  const [whatsappPhone, setWhatsappPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -30,14 +31,15 @@ export default function RequestBlood() {
       blood_group: bloodGroup,
       units: parseInt(units) || 1,
       urgency,
-      hospital,
-      hospital_address: hospitalAddress,
+      hospital: hospital.trim() || 'N/A',
+      hospital_address: 'N/A',
       attendant_name: attendantName,
       phone,
+      whatsapp: isWhatsappSame === 'yes' ? phone : whatsappPhone,
       status: 'pending'
     };
 
-    fetch('/api/requests/', {
+    fetch('https://api.bloodconnect.digielvestech.in/api/requests/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -152,25 +154,13 @@ export default function RequestBlood() {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="hospital" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hospital Name *</Label>
+                  <Label htmlFor="hospital" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hospital Name</Label>
                   <Input 
                     id="hospital" 
-                    placeholder="Hospital name" 
+                    placeholder="e.g. Kokilaben, Hinduja (Optional)" 
                     value={hospital}
                     onChange={e => setHospital(e.target.value)}
                     className="h-10 text-sm"
-                    required 
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="hospitalAddr" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Hospital Address *</Label>
-                  <Input 
-                    id="hospitalAddr" 
-                    placeholder="Hospital address" 
-                    value={hospitalAddress}
-                    onChange={e => setHospitalAddress(e.target.value)}
-                    className="h-10 text-sm"
-                    required 
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -195,6 +185,52 @@ export default function RequestBlood() {
                     required 
                   />
                 </div>
+                
+                {/* WhatsApp Option */}
+                <div className="space-y-2 sm:col-span-2">
+                  <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">Is this also your WhatsApp number? *</Label>
+                  <div className="flex gap-6 pt-1">
+                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer text-foreground">
+                      <input 
+                        type="radio" 
+                        name="whatsapp-same" 
+                        value="yes"
+                        checked={isWhatsappSame === 'yes'}
+                        onChange={() => {
+                          setIsWhatsappSame('yes');
+                          setWhatsappPhone('');
+                        }}
+                        className="h-4 w-4 text-primary focus:ring-primary accent-destructive cursor-pointer"
+                      />
+                      Yes
+                    </label>
+                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer text-foreground">
+                      <input 
+                        type="radio" 
+                        name="whatsapp-same" 
+                        value="no"
+                        checked={isWhatsappSame === 'no'}
+                        onChange={() => setIsWhatsappSame('no')}
+                        className="h-4 w-4 text-primary focus:ring-primary accent-destructive cursor-pointer"
+                      />
+                      No (Add WhatsApp Number)
+                    </label>
+                  </div>
+                </div>
+                
+                {isWhatsappSame === 'no' && (
+                  <div className="space-y-1.5 sm:col-span-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <Label htmlFor="whatsapp" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">WhatsApp Number *</Label>
+                    <Input 
+                      id="whatsapp" 
+                      placeholder="+91 98765 43210" 
+                      value={whatsappPhone}
+                      onChange={e => setWhatsappPhone(e.target.value)}
+                      className="h-10 text-sm"
+                      required 
+                    />
+                  </div>
+                )}
               </div>
 
               <Button type="submit" size="lg" className="w-full gap-2 h-12 bg-destructive hover:bg-destructive/90 text-white font-semibold transition-transform active:scale-[0.98]" disabled={isSubmitting}>

@@ -49,6 +49,8 @@ export default function SearchBlood() {
   const [dialogUrgency, setDialogUrgency] = useState('Normal');
   const [dialogPhone, setDialogPhone] = useState('');
   const [dialogAttendant, setDialogAttendant] = useState('');
+  const [dialogIsWhatsappSame, setDialogIsWhatsappSame] = useState('yes');
+  const [dialogWhatsappPhone, setDialogWhatsappPhone] = useState('');
 
   const openRequestModal = (bb: any) => {
     setDialogPatientName('');
@@ -57,6 +59,8 @@ export default function SearchBlood() {
     setDialogUrgency('Normal');
     setDialogPhone('');
     setDialogAttendant('');
+    setDialogIsWhatsappSame('yes');
+    setDialogWhatsappPhone('');
     setRequestModalOpen(bb.id);
   };
 
@@ -81,11 +85,11 @@ export default function SearchBlood() {
       hospital_address: bb.location || bb.district || 'Mumbai',
       attendant_name: dialogAttendant,
       phone: dialogPhone,
+      whatsapp: dialogIsWhatsappSame === 'yes' ? dialogPhone : dialogWhatsappPhone,
       status: 'pending'
     };
 
-    const apiBase = 'https://api.bloodconnect.digielvestech.in'
-    fetch(`${apiBase}/api/requests/`, {
+    fetch('https://api.bloodconnect.digielvestech.in/api/requests/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -123,8 +127,7 @@ export default function SearchBlood() {
   };
 
   const fetchBloodBanks = () => {
-    const apiBase = import.meta.env.PROD ? 'https://api.bloodconnect.digielvestech.in' : '';
-    fetch(`${apiBase}/api/bloodbanks/`)
+    fetch('https://api.bloodconnect.digielvestech.in/api/bloodbanks/')
       .then(res => res.json())
       .then(data => {
         setBloodBanks(data);
@@ -138,8 +141,7 @@ export default function SearchBlood() {
 
   const handleSync = () => {
     setSyncing(true);
-    const apiBase = import.meta.env.PROD ? 'https://api.bloodconnect.digielvestech.in' : '';
-    fetch(`${apiBase}/api/bloodbanks/refresh/`, { method: 'POST' })
+    fetch('https://api.bloodconnect.digielvestech.in/api/bloodbanks/refresh/', { method: 'POST' })
       .then(res => {
         if (!res.ok) throw new Error('Sync failed');
         toast({
@@ -482,6 +484,52 @@ return (
                                 />
                               </div>
                             </div>
+                            
+                            {/* WhatsApp Option */}
+                            <div className="space-y-2">
+                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block">Is this also your WhatsApp number? *</Label>
+                              <div className="flex gap-6 pt-1">
+                                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer text-foreground">
+                                  <input 
+                                    type="radio" 
+                                    name="dialog-whatsapp-same" 
+                                    value="yes"
+                                    checked={dialogIsWhatsappSame === 'yes'}
+                                    onChange={() => {
+                                      setDialogIsWhatsappSame('yes');
+                                      setDialogWhatsappPhone('');
+                                    }}
+                                    className="h-4 w-4 text-primary focus:ring-primary accent-destructive cursor-pointer"
+                                  />
+                                  Yes
+                                </label>
+                                <label className="flex items-center gap-2 text-sm font-medium cursor-pointer text-foreground">
+                                  <input 
+                                    type="radio" 
+                                    name="dialog-whatsapp-same" 
+                                    value="no"
+                                    checked={dialogIsWhatsappSame === 'no'}
+                                    onChange={() => setDialogIsWhatsappSame('no')}
+                                    className="h-4 w-4 text-primary focus:ring-primary accent-destructive cursor-pointer"
+                                  />
+                                  No (Add WhatsApp Number)
+                                </label>
+                              </div>
+                            </div>
+                            
+                            {dialogIsWhatsappSame === 'no' && (
+                              <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                                <Label htmlFor="dialog-whatsapp" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">WhatsApp Number *</Label>
+                                <Input
+                                  id="dialog-whatsapp"
+                                  placeholder="+91 xxxxx xxxxx"
+                                  value={dialogWhatsappPhone}
+                                  onChange={e => setDialogWhatsappPhone(e.target.value)}
+                                  required
+                                />
+                              </div>
+                            )}
+
                             <div>
                               <Label htmlFor="dialog-attendant">Attendant Name *</Label>
                               <Input
@@ -492,13 +540,9 @@ return (
                                 required
                               />
                             </div>
-                            <div>
-                              <Label htmlFor="dialog-hospital">Hospital Name</Label>
-                              <Input id="dialog-hospital" value={bb.name} disabled className="bg-muted" />
-                            </div>
-                            <div>
-                              <Label htmlFor="dialog-hospital-addr">Hospital Address</Label>
-                              <Input id="dialog-hospital-addr" value={bb.location || bb.district || ''} disabled className="bg-muted" />
+                            <div className="space-y-1.5">
+                              <Label htmlFor="dialog-hospital" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Request Target Blood Bank</Label>
+                              <Input id="dialog-hospital" value={bb.name} disabled className="bg-muted text-sm h-10" />
                             </div>
                             <Button type="submit" className="w-full gap-2 bg-destructive hover:bg-destructive/90 text-white font-medium" disabled={submittingRequest}>
                               {submittingRequest ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting...</> : <><Heart className="h-4 w-4 fill-current" /> Submit Request</>}

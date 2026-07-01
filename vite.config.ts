@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
     proxy: {
-      //api': 'http://127.0.0.1:8000'
+    //'/api': 'http://127.0.0.1:8000'
        '/api': 'https://api.bloodconnect.digielvestech.in'
     }
   },
