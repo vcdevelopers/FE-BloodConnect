@@ -15,7 +15,6 @@ export default function RequestBlood() {
   const [units, setUnits] = useState('');
   const [urgency, setUrgency] = useState('');
   const [hospital, setHospital] = useState('');
-  const [attendantName, setAttendantName] = useState('');
   const [phone, setPhone] = useState('');
   const [isWhatsappSame, setIsWhatsappSame] = useState('yes');
   const [whatsappPhone, setWhatsappPhone] = useState('');
@@ -33,7 +32,7 @@ export default function RequestBlood() {
       urgency,
       hospital: hospital.trim() || 'N/A',
       hospital_address: 'N/A',
-      attendant_name: attendantName,
+      attendant_name: patientName,
       phone,
       whatsapp: isWhatsappSame === 'yes' ? phone : whatsappPhone,
       status: 'pending'
@@ -111,10 +110,10 @@ export default function RequestBlood() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="patient" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Patient Name *</Label>
+                  <Label htmlFor="patient" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name *</Label>
                   <Input 
                     id="patient" 
-                    placeholder="Patient's full name" 
+                    placeholder="Full name" 
                     value={patientName}
                     onChange={e => setPatientName(e.target.value)}
                     className="h-10 text-sm"
@@ -161,17 +160,6 @@ export default function RequestBlood() {
                     value={hospital}
                     onChange={e => setHospital(e.target.value)}
                     className="h-10 text-sm"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="attendant" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Attendant Name *</Label>
-                  <Input 
-                    id="attendant" 
-                    placeholder="Contact person name" 
-                    value={attendantName}
-                    onChange={e => setAttendantName(e.target.value)}
-                    className="h-10 text-sm"
-                    required 
                   />
                 </div>
                 <div className="space-y-1.5">

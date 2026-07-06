@@ -227,12 +227,19 @@ const results = bloodBanks.filter((bb) => {
   if (hospitalName && !(bb.name || '').toLowerCase().includes(hospitalName.toLowerCase())) return false;
   if (bloodGroup && bloodGroup !== 'ALL') {
     const agg = getAggregatedInventory(bb.inventory);
-    // Check if ANY component entry for this blood group has units > 0
     const hasStock = agg.some(item => item.group.toLowerCase() === bloodGroup.toLowerCase() && item.units > 0);
     if (!hasStock) return false;
   }
-  if (zone && zone !== 'ALL' && bb.zone?.toLowerCase() !== zone.toLowerCase() && bb.district?.toLowerCase() !== zone.toLowerCase()) return false;
-  if (pincode && (bb.pincode?.toString().replace(/\s+/g, '') !== pincode.replace(/\s+/g, ''))) return false;
+  if (zone && zone !== 'ALL') {
+    const zLower = zone.toLowerCase();
+    const bbZoneLower = (bb.zone || '').toLowerCase();
+    const bbDistLower = (bb.district || '').toLowerCase();
+    const zoneMatches = 
+      bbZoneLower === zLower || 
+      bbDistLower === zLower ||
+      (zLower === 'mumbai' && (bbZoneLower.includes('mumbai') || bbDistLower.includes('mumbai')));
+    if (!zoneMatches) return false;
+  }
   return true;
 });
 
@@ -270,9 +277,9 @@ return (
       {/* Filters */}
       <Card className="border shadow-md bg-card/50 backdrop-blur">
         <CardContent className="p-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div>
-              <Label>Hospital / Blood Bank</Label>
+              <Label>Blood Bank</Label>
               <Input
                 placeholder="e.g. Holy Spirit, Kikabai..."
                 value={hospitalName}
@@ -298,19 +305,6 @@ return (
                   {MUMBAI_ZONES.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label>Pincode</Label>
-              <Input
-                placeholder="e.g. 400050"
-                value={pincode}
-                onChange={e => setPincode(e.target.value)}
-              />
-            </div>
-            <div className="flex items-end">
-              <Button className="w-full gap-2" onClick={() => setSearched(true)}>
-                <Search className="h-4 w-4" /> Search
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -354,8 +348,16 @@ return (
                         </div>
                       )}
                       <h3 className="font-bold text-lg text-foreground">{bb.name}</h3>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
-                        <MapPin className="h-4 w-4 text-primary/75" /> {bb.location || bb.district} • {bb.distance || 'Nearby'}
+                      <div className="flex items-start gap-1.5 text-sm text-muted-foreground mt-1">
+                        <MapPin className="h-4 w-4 text-primary/75 shrink-0 mt-0.5" /> 
+                        <div>
+                          <p className="font-medium text-foreground/80 leading-normal">
+                            {bb.location || bb.name}, Maharashtra - {bb.pincode}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            District: {bb.district} • {bb.zone} Zone
+                          </p>
+                        </div>
                       </div>
                     </div>
                     {/* Inventory Section */}

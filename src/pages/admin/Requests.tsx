@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckCircle, XCircle, Loader2, Search } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Search, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -119,6 +119,32 @@ export default function AdminRequests() {
           variant: "destructive",
           title: "Action Failed",
           description: "Could not cancel blood request.",
+        });
+        setActionId(null);
+      });
+  };
+
+  const handleDelete = (id: string) => {
+    if (!window.confirm("Are you sure you want to permanently delete this request?")) return;
+    setActionId(id);
+    fetch(`/api/requests/${id}/`, {
+      method: 'DELETE',
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Deletion failed');
+        toast({
+          title: "Request Deleted",
+          description: "The blood request has been permanently deleted.",
+        });
+        setRequests(prev => prev.filter(r => r.id !== id));
+        setActionId(null);
+      })
+      .catch(err => {
+        console.error(err);
+        toast({
+          variant: "destructive",
+          title: "Action Failed",
+          description: "Could not delete blood request.",
         });
         setActionId(null);
       });
@@ -253,6 +279,16 @@ export default function AdminRequests() {
                               onClick={() => handleCancel(r.id)}
                             >
                               <XCircle className="h-4 w-4 text-destructive" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              title="Delete"
+                              className="hover:bg-destructive/10"
+                              disabled={actionId === r.id}
+                              onClick={() => handleDelete(r.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
                         </TableCell>
