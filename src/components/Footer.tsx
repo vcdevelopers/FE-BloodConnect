@@ -1,82 +1,72 @@
-import { Droplets, Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Footer() {
   return (
     <footer className="border-t bg-muted/50">
       <div className="container py-12">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <div className="mb-4 flex flex-wrap items-center sm:gap-2">
+        {/* Adjusted from lg:grid-cols-4 to lg:grid-cols-3 for balanced spatial distribution */}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 items-start">
+          
+          {/* Section 1: Brand & Logos */}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row items-center gap-4 flex-wrap">
               <img
                 src={`${import.meta.env.BASE_URL}Regal Logo.png`}
                 alt="Regal Logo"
-                className="h-12 w-auto object-contain sm:h-14"
+                className="h-10 w-auto object-contain lg:h-[3.5rem]" 
               />
               <img
                 src={`${import.meta.env.BASE_URL}Create Lasting Impact.png`}
                 alt="Create Lasting Impact Logo"
-                className="h-12 w-auto object-contain sm:h-14"
+                className="h-10 w-auto object-contain lg:h-[4.5rem]" 
               />
               <img
                 src={`${import.meta.env.BASE_URL}Rotary.png`}
                 alt="Rotary Logo"
-                className="h-12 w-auto object-contain sm:h-14"
+                className="h-10 w-auto object-contain lg:h-[5rem]" 
               />
             </div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <Droplets className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="font-bold">Mumbai Blood Tracker</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
               Connecting blood donors with those in need across Mumbai. Every drop counts.
             </p>
           </div>
 
+          {/* Section 2: Quick Links */}
           <div>
-            <h4 className="mb-4 font-semibold">Quick Links</h4>
-            <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-              <Link to="/search" className="hover:text-primary transition-colors">Search Blood</Link>
-              <Link to="/donate" className="hover:text-primary transition-colors">Become a Donor</Link>
-              <Link to="/camps" className="hover:text-primary transition-colors">Blood Camps</Link>
-              <Link to="/request" className="hover:text-primary transition-colors">Request Blood</Link>
+            <h4 className="mb-4 font-semibold text-foreground tracking-wide">Quick Links</h4>
+            <div className="flex flex-col gap-2.5 text-sm text-muted-foreground">
+              <Link to="/search" className="hover:text-primary transition-colors w-fit">
+                Search Blood
+              </Link>
+              <Link to="/request" className="hover:text-primary transition-colors w-fit">
+                Request Blood
+              </Link>
             </div>
           </div>
 
+          {/* Section 3: Emergency Contacts */}
           <div>
-            <h4 className="mb-4 font-semibold">Emergency Contacts</h4>
-            <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-primary" />
+            <h4 className="mb-4 font-semibold text-foreground tracking-wide">Emergency Contacts</h4>
+            <div className="flex flex-col gap-3.5 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 text-primary shrink-0" />
                 <span>(022) - 26772036 / 66952036</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-primary" />
-                {/* <span>Emergency: 108</span> */}
+              <div className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 text-primary shrink-0" />
                 <span>(022) - 66922036 / 42642036</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-primary" />
-                <span>arun.wadhwa@envisageideas.com</span>
-                
+              <div className="flex items-center gap-2.5">
+                <Mail className="h-4 w-4 text-primary shrink-0" />
+                <span className="break-all">mumbaibloodtracker@gmail.com</span>
               </div>
-              {/* <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;info@digielvestech.in</span> */}
             </div>
           </div>
 
-          <div>
-            <h4 className="mb-4 font-semibold">NGO Partners</h4>
-            <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-              <span>Indian Red Cross Society</span>
-              <span>Rotary Blood Bank</span>
-              <span>Friends2Support</span>
-              <span>BloodConnect Foundation</span>
-            </div>
-          </div>
         </div>
 
+        {/* Unchanged Bottom Copyright section */}
         <div className="mt-8 border-t pt-6 text-center text-sm text-muted-foreground">
           © 2026 Mumbai Blood Connect. All rights reserved. Made with ❤️ for Mumbai.
         </div>
