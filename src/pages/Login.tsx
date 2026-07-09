@@ -106,7 +106,7 @@ export default function Login() {
             <Tabs defaultValue="login">
               <TabsList className="mb-4 w-full">
                 <TabsTrigger value="login" className="flex-1">Login</TabsTrigger>
-                <TabsTrigger value="register" className="flex-1">Register</TabsTrigger>
+                {/* <TabsTrigger value="register" className="flex-1">Register</TabsTrigger> */}
               </TabsList>
 
               {/* Login Form */}
