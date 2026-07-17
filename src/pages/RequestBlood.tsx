@@ -73,7 +73,7 @@ export default function RequestBlood() {
             </div>
             <h2 className="mb-2 text-2xl font-bold">Request Submitted!</h2>
             <p className="text-muted-foreground">
-              Your blood request has been received. Our team will notify matching donors and contact you shortly. For emergencies, call +91 22 1234 5678.
+              Your blood request has been received. Our team will notify matching donors and contact you shortly.
             </p>
           </CardContent>
         </Card>

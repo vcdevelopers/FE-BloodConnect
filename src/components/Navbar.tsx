@@ -62,9 +62,9 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          {/* <Link to="/login">
+          <Link to="/login">
             <Button variant="outline" size="sm" className="ml-2">Login</Button>
-          </Link> */}
+          </Link>
         </nav>
 
         {/* Mobile toggle */}
