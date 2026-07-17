@@ -23,6 +23,7 @@ import AdminSettings from "./pages/admin/Settings";
 import AdminMatchingEngine from "./pages/admin/MatchingEngine";
 import InstallApp from "./pages/InstallApp";
 import NotFound from "./pages/NotFound";
+import Community from "./pages/Community";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/organize" element={<OrganizeCamp />} />
             <Route path="/login" element={<Login />} />
             <Route path="/install" element={<InstallApp />} />
+            <Route path="/community" element={<Community />} />
           </Route>
 
           {/* Admin routes */}

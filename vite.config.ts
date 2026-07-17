@@ -9,12 +9,12 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    hmr: {  
+    hmr: {
       overlay: false,
     },
     proxy: {
-    //'/api': 'http://127.0.0.1:8000'
-       '/api': 'https://api.bloodconnect.digielvestech.in'
+      //'/api': 'http://127.0.0.1:8001'
+      '/api': 'https://api.bloodconnect.digielvestech.in'
     }
   },
   plugins: [

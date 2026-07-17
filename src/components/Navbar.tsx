@@ -7,6 +7,7 @@ const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Search Blood', href: '/search' },
   { label: 'Request Blood', href: '/request' },
+  { label: 'Community', href: '/community' },
 ];
 
 export function Navbar() {
@@ -61,9 +62,9 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link to="/login">
+          {/* <Link to="/login">
             <Button variant="outline" size="sm" className="ml-2">Login</Button>
-          </Link>
+          </Link> */}
         </nav>
 
         {/* Mobile toggle */}
@@ -92,9 +93,9 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
-            <Link to="/login" onClick={() => setOpen(false)}>
+            {/* <Link to="/login" onClick={() => setOpen(false)}>
               <Button variant="outline" className="mt-2 w-full h-12">Login</Button>
-            </Link>
+            </Link> */}
           </div>
         </nav>
       )}

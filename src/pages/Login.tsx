@@ -53,7 +53,7 @@ export default function Login() {
     }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (regPassword !== regConfirm) {
       toast({
@@ -63,11 +63,38 @@ export default function Login() {
       });
       return;
     }
-    toast({
-      title: "Account Created",
-      description: `Welcome ${regName}! You have registered successfully as a general user.`,
-    });
-    navigate('/');
+    try {
+      const response = await fetch('/api/auth/register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: regName,
+          email: regEmail,
+          password: regPassword,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.status === 'success') {
+        toast({
+          title: "Account Created",
+          description: `Welcome ${regName}! Your account has been successfully created.`,
+        });
+        // Save token to localStorage for immediate authentication
+        localStorage.setItem('admin_token', 'true');
+        navigate('/');
+      } else {
+        throw new Error(data.message || 'Failed to register.');
+      }
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Registration Failed",
+        description: err.message || "Failed to connect to authentication server. Please try again.",
+      });
+    }
   };
 
   return (
