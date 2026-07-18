@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Heart, Users, Building2, Calendar, Bell, BarChart3, Settings, Droplets, LogOut, Zap } from 'lucide-react';
+import { LayoutDashboard, Heart, Users, Building2, Calendar, Bell, BarChart3, Settings, Droplets, LogOut, Zap, MessageSquare } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
@@ -16,7 +16,18 @@ const items = [
   { title: 'Reports', url: '/admin/reports', icon: BarChart3 },
   { title: 'Settings', url: '/admin/settings', icon: Settings },
   { title: 'Matching Engine', url: '/admin/matching', icon: Zap },
+  { title: 'Community Posts', url: '/admin/community', icon: MessageSquare },
 ];
+
+const getAdminUrl = (url: string, external?: boolean) => {
+  if (external && typeof window !== 'undefined') {
+    const { hostname } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `http://${hostname}:8000${url}`;
+    }
+  }
+  return url;
+};
 
 function AdminSidebar() {
   const { state } = useSidebar();
@@ -38,15 +49,27 @@ function AdminSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === '/admin'}
-                      className="hover:bg-sidebar-accent/50"
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
+                    {item.external ? (
+                      <a
+                        href={getAdminUrl(item.url, item.external)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </a>
+                    ) : (
+                      <NavLink
+                        to={item.url}
+                        end={item.url === '/admin'}
+                        className="hover:bg-sidebar-accent/50"
+                        activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        {!collapsed && <span>{item.title}</span>}
+                      </NavLink>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

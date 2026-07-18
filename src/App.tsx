@@ -21,9 +21,11 @@ import AdminAlerts from "./pages/admin/Alerts";
 import AdminReports from "./pages/admin/Reports";
 import AdminSettings from "./pages/admin/Settings";
 import AdminMatchingEngine from "./pages/admin/MatchingEngine";
+import AdminCommunityPosts from "./pages/admin/CommunityPosts";
 import InstallApp from "./pages/InstallApp";
 import NotFound from "./pages/NotFound";
 import Community from "./pages/Community";
+import CommunityPostDetail from "./pages/CommunityPostDetail";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/install" element={<InstallApp />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/community/post/:id" element={<CommunityPostDetail />} />
           </Route>
 
           {/* Admin routes */}
@@ -58,6 +61,7 @@ const App = () => (
             <Route path="reports" element={<AdminReports />} />
             <Route path="settings" element={<AdminSettings />} />
             <Route path="matching" element={<AdminMatchingEngine />} />
+            <Route path="community" element={<AdminCommunityPosts />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

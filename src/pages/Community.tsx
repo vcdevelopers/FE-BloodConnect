@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { 
   Heart, MessageSquare, Plus, AlertCircle, Quote, 
-  Sparkles, Filter, Loader2, Calendar, CheckCircle, RefreshCw
+  Sparkles, Filter, Loader2, Calendar, CheckCircle, RefreshCw,
+  Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -106,22 +107,19 @@ export default function Community() {
   }, []);
 
   const handleLike = async (postId: number) => {
-    if (likedPosts.includes(postId)) {
-      toast({
-        title: "Already Liked",
-        description: "You have already liked this community post.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Capture previous state for rollback
+    const isAlreadyLiked = likedPosts.includes(postId);
     const previousPosts = [...posts];
-    const updatedLikes = [...likedPosts, postId];
+    const previousLikedPosts = [...likedPosts];
 
     // Optimistic Update
+    const updatedLikes = isAlreadyLiked
+      ? likedPosts.filter(id => id !== postId)
+      : [...likedPosts, postId];
+
     setPosts(prev => prev.map(post => 
-      post.id === postId ? { ...post, likes_count: post.likes_count + 1 } : post
+      post.id === postId 
+        ? { ...post, likes_count: Math.max(0, post.likes_count + (isAlreadyLiked ? -1 : 1)) } 
+        : post
     ));
     setLikedPosts(updatedLikes);
     localStorage.setItem('liked_posts', JSON.stringify(updatedLikes));
@@ -143,20 +141,63 @@ export default function Community() {
         post.id === postId ? { ...post, likes_count: data.likes_count } : post
       ));
     } catch (err: any) {
-      console.error("Failed to post like:", err);
+      console.error("Failed to update like status:", err);
       
       // Rollback immediately
       setPosts(previousPosts);
-      const revertedLikes = likedPosts.filter(id => id !== postId);
-      setLikedPosts(revertedLikes);
-      localStorage.setItem('liked_posts', JSON.stringify(revertedLikes));
+      setLikedPosts(previousLikedPosts);
+      localStorage.setItem('liked_posts', JSON.stringify(previousLikedPosts));
 
       toast({
-        title: "Like Failed",
-        description: err.message || "Failed to submit like to the server. Reverted.",
+        title: isAlreadyLiked ? "Unlike Failed" : "Like Failed",
+        description: err.message || "Failed to update like status on the server. Reverted.",
         variant: "destructive"
       });
     }
+  };
+
+  const handleShare = async (post: CommunityPost) => {
+    const shareUrl = `${window.location.origin}/community/post/${post.id}`;
+    const shareTitle = post.title || "Community Post on Mumbai Blood Connect";
+    const shareText = `Check out this post by ${post.author_name} on Mumbai Blood Connect: "${post.content.substring(0, 100)}${post.content.length > 100 ? '...' : ''}"`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        toast({
+          title: "Shared successfully",
+          description: "Thank you for spreading the word!",
+        });
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          copyToClipboard(shareUrl);
+        }
+      }
+    } else {
+      copyToClipboard(shareUrl);
+    }
+  };
+
+  const copyToClipboard = (url: string) => {
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        toast({
+          title: "Link copied",
+          description: "Link copied to clipboard.",
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to copy link:", err);
+        toast({
+          variant: "destructive",
+          title: "Failed to copy",
+          description: "Could not copy link to clipboard.",
+        });
+      });
   };
 
   const handleCreatePost = async (e: React.FormEvent) => {
@@ -525,23 +566,34 @@ export default function Community() {
                         </div>
                       </div>
 
-                      {/* Like button with micro-animation */}
-                      <button
-                        onClick={() => handleLike(post.id)}
-                        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-300 border ${
-                          isLiked
-                            ? 'bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/20 dark:border-rose-900/50 scale-105'
-                            : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-rose-600 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-400'
-                        }`}
-                        aria-label="Like post"
-                      >
-                        <Heart 
-                          className={`h-4 w-4 transition-transform duration-300 ${
-                            isLiked ? 'fill-rose-500 text-rose-500 scale-110' : ''
-                          }`} 
-                        />
-                        <span>{post.likes_count}</span>
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        {/* Like button with micro-animation */}
+                        <button
+                          onClick={() => handleLike(post.id)}
+                          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-300 border ${
+                            isLiked
+                              ? 'bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-950/20 dark:border-rose-900/50 scale-105'
+                              : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-rose-600 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-400'
+                          }`}
+                          aria-label="Like post"
+                        >
+                          <Heart 
+                            className={`h-4 w-4 transition-transform duration-300 ${
+                              isLiked ? 'fill-rose-500 text-rose-500 scale-110' : ''
+                            }`} 
+                          />
+                          <span>{post.likes_count}</span>
+                        </button>
+
+                        {/* Share button */}
+                        <button
+                          onClick={() => handleShare(post)}
+                          className="flex items-center justify-center rounded-full p-1.5 text-slate-500 hover:bg-slate-100 hover:text-rose-600 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-400 transition-colors"
+                          aria-label="Share post"
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

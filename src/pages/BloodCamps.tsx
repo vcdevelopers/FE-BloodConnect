@@ -1,25 +1,22 @@
 // import { mockCampaigns, MUMBAI_ZONES } from '@/lib/mock-data';
 
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, Clock, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
 import { MUMBAI_ZONES } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
+import { CampCard, Camp } from '@/components/CampCard';
 
 export default function BloodCamps() {
   const [zone, setZone] = useState('');
-  const [camps, setCamps] = useState<any[]>([]);
+  const [camps, setCamps] = useState<Camp[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bookingId, setBookingId] = useState<string | null>(null);
+  const [bookingId, setBookingId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const fetchCamps = () => {
-    fetch('/api/camps/')
+    fetch('/api/camps/?status=upcoming')
       .then(res => res.json())
       .then(data => {
         setCamps(data);
@@ -35,7 +32,7 @@ export default function BloodCamps() {
     fetchCamps();
   }, []);
 
-  const handleRegister = (campId: string) => {
+  const handleRegister = (campId: number) => {
     setBookingId(campId);
     fetch(`/api/camps/${campId}/book_slot/`, {
       method: 'POST',
@@ -97,59 +94,35 @@ export default function BloodCamps() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((camp) => {
-              const booked = camp.slots_booked !== undefined ? camp.slots_booked : camp.slotsBooked || 0;
-              const pct = Math.round((booked / camp.slots) * 100);
-              const isFull = booked >= camp.slots;
-              
-              return (
-                <Card key={camp.id} className="overflow-hidden">
-                  <div className="h-2 bg-primary" />
-                  <CardContent className="p-5">
-                    <Badge variant="secondary" className="mb-3">{camp.zone}</Badge>
-                    <h3 className="mb-1 text-lg font-bold">{camp.name}</h3>
-                    <p className="mb-3 text-sm text-muted-foreground">{camp.organizer}</p>
-                    <div className="mb-4 space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2"><Calendar className="h-4 w-4" />{camp.date}</div>
-                      <div className="flex items-center gap-2"><Clock className="h-4 w-4" />{camp.time}</div>
-                      <div className="flex items-center gap-2"><MapPin className="h-4 w-4" />{camp.location}</div>
-                    </div>
-                    <div className="mb-3">
-                      <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-                        <span>{booked} registered</span>
-                        <span>{camp.slots} slots</span>
-                      </div>
-                      <Progress value={pct} className="h-2" />
-                    </div>
-                    <p className="mb-4 text-sm text-muted-foreground min-h-[40px]">{camp.description}</p>
-                    <Button 
-                      className="w-full gap-2" 
-                      onClick={() => handleRegister(camp.id)}
-                      disabled={isFull || bookingId === camp.id}
-                    >
-                      {bookingId === camp.id ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" /> Registering...
-                        </>
-                      ) : isFull ? (
-                        'Camp Full'
-                      ) : (
-                        <>
-                          <Users className="h-4 w-4" /> Register to Donate
-                        </>
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {filtered.map((camp) => (
+              <CampCard 
+                key={camp.id} 
+                camp={camp} 
+                bookingId={bookingId} 
+                handleRegister={handleRegister} 
+              />
+            ))}
           </div>
         )}
 
-        {!loading && filtered.length === 0 && (
-          <div className="mt-12 text-center text-muted-foreground">
+        {!loading && camps.length === 0 && (
+          <div className="mt-16 text-center text-muted-foreground max-w-md mx-auto space-y-4 py-8">
+            <div className="mx-auto w-16 h-16 bg-rose-50 dark:bg-rose-950/20 text-rose-500 rounded-full flex items-center justify-center border border-rose-100 dark:border-rose-900/30">
+              <Calendar className="h-8 w-8" />
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">No Upcoming Blood Donation Camps</h3>
+              <p className="text-sm text-muted-foreground">
+                There are currently no scheduled donation camps. Please check back later.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!loading && camps.length > 0 && filtered.length === 0 && (
+          <div className="mt-16 text-center text-muted-foreground py-8">
             <Calendar className="mx-auto mb-4 h-12 w-12 opacity-30" />
-            <p>No camps found in this area. Try a different filter.</p>
+            <p className="text-sm">No camps found in this area. Try a different filter.</p>
           </div>
         )}
       </div>

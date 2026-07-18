@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckCircle, Trash2, Loader2, Search, Plus } from 'lucide-react';
+import { CheckCircle, Trash2, Loader2, Search, Plus, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,7 +28,40 @@ export default function AdminCampaigns() {
   const [time, setTime] = useState('');
   const [slots, setSlots] = useState('100');
   const [description, setDescription] = useState('');
+  
+  // Extended fields
+  const [campImage, setCampImage] = useState<File | null>(null);
+  const [googleMapsLink, setGoogleMapsLink] = useState('');
+  const [contactPerson, setContactPerson] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+  const [bloodGroupsNeeded, setBloodGroupsNeeded] = useState('');
+  const [registrationLink, setRegistrationLink] = useState('');
+  
   const [creating, setCreating] = useState(false);
+
+  // Edit Camp States
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingCampId, setEditingCampId] = useState<number | null>(null);
+  
+  const [editName, setEditName] = useState('');
+  const [editOrganizer, setEditOrganizer] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [editCampZone, setEditCampZone] = useState('');
+  const [editDate, setEditDate] = useState('');
+  const [editTime, setEditTime] = useState('');
+  const [editSlots, setEditSlots] = useState('100');
+  const [editDescription, setEditDescription] = useState('');
+  const [editGoogleMapsLink, setEditGoogleMapsLink] = useState('');
+  const [editContactPerson, setEditContactPerson] = useState('');
+  const [editContactNumber, setEditContactNumber] = useState('');
+  const [editBloodGroupsNeeded, setEditBloodGroupsNeeded] = useState('');
+  const [editRegistrationLink, setEditRegistrationLink] = useState('');
+  const [editStatus, setEditStatus] = useState('upcoming');
+  const [editCampImage, setEditCampImage] = useState<File | null>(null);
+  const [editCurrentImageUrl, setEditCurrentImageUrl] = useState<string | null>(null);
+  const [removeCurrentImage, setRemoveCurrentImage] = useState(false);
+  
+  const [updating, setUpdating] = useState(false);
 
   const handleCreateCamp = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,24 +75,29 @@ export default function AdminCampaigns() {
     }
     setCreating(true);
 
-    const payload = {
-      name,
-      organizer,
-      location,
-      zone: campZone,
-      date,
-      time,
-      slots: parseInt(slots) || 100,
-      description,
-      status: 'upcoming'
-    };
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('organizer', organizer);
+    formData.append('location', location);
+    formData.append('zone', campZone);
+    formData.append('date', date);
+    formData.append('time', time);
+    formData.append('slots', slots);
+    formData.append('description', description);
+    formData.append('status', 'upcoming');
+    formData.append('google_maps_link', googleMapsLink);
+    formData.append('contact_person', contactPerson);
+    formData.append('contact_number', contactNumber);
+    formData.append('blood_groups_needed', bloodGroupsNeeded);
+    formData.append('registration_link', registrationLink);
+    
+    if (campImage) {
+      formData.append('image', campImage);
+    }
 
     fetch('/api/camps/', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
+      body: formData
     })
       .then(res => {
         if (!res.ok) throw new Error('Failed to create camp');
@@ -80,6 +118,12 @@ export default function AdminCampaigns() {
         setTime('');
         setSlots('100');
         setDescription('');
+        setCampImage(null);
+        setGoogleMapsLink('');
+        setContactPerson('');
+        setContactNumber('');
+        setBloodGroupsNeeded('');
+        setRegistrationLink('');
         // Reload list
         fetchCamps();
         setCreating(false);
@@ -92,6 +136,90 @@ export default function AdminCampaigns() {
           description: 'Could not create blood camp. Please try again.',
         });
         setCreating(false);
+      });
+  };
+
+  const startEditCamp = (camp: any) => {
+    setEditingCampId(camp.id);
+    setEditName(camp.name || '');
+    setEditOrganizer(camp.organizer || '');
+    setEditLocation(camp.location || '');
+    setEditCampZone(camp.zone || '');
+    setEditDate(camp.date || '');
+    setEditTime(camp.time || '');
+    setEditSlots(String(camp.slots || 100));
+    setEditDescription(camp.description || '');
+    setEditGoogleMapsLink(camp.google_maps_link || '');
+    setEditContactPerson(camp.contact_person || '');
+    setEditContactNumber(camp.contact_number || '');
+    setEditBloodGroupsNeeded(camp.blood_groups_needed || '');
+    setEditRegistrationLink(camp.registration_link || '');
+    setEditStatus(camp.status || 'upcoming');
+    setEditCampImage(null);
+    setEditCurrentImageUrl(camp.image || null);
+    setRemoveCurrentImage(false);
+    setEditModalOpen(true);
+  };
+
+  const handleUpdateCamp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editName || !editOrganizer || !editLocation || !editCampZone || !editDate || !editTime) {
+      toast({
+        variant: 'destructive',
+        title: 'Missing Fields',
+        description: 'Please fill in all required fields.',
+      });
+      return;
+    }
+    setUpdating(true);
+
+    const formData = new FormData();
+    formData.append('name', editName);
+    formData.append('organizer', editOrganizer);
+    formData.append('location', editLocation);
+    formData.append('zone', editCampZone);
+    formData.append('date', editDate);
+    formData.append('time', editTime);
+    formData.append('slots', editSlots);
+    formData.append('description', editDescription);
+    formData.append('status', editStatus);
+    formData.append('google_maps_link', editGoogleMapsLink);
+    formData.append('contact_person', editContactPerson);
+    formData.append('contact_number', editContactNumber);
+    formData.append('blood_groups_needed', editBloodGroupsNeeded);
+    formData.append('registration_link', editRegistrationLink);
+
+    if (editCampImage) {
+      formData.append('image', editCampImage);
+    } else if (removeCurrentImage) {
+      formData.append('image', '');
+    }
+
+    fetch(`/api/camps/${editingCampId}/`, {
+      method: 'PUT',
+      body: formData
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to update camp');
+        return res.json();
+      })
+      .then(() => {
+        toast({
+          title: '✅ Camp Updated',
+          description: `Blood camp "${editName}" changes have been saved.`,
+        });
+        setEditModalOpen(false);
+        fetchCamps();
+        setUpdating(false);
+      })
+      .catch(err => {
+        console.error(err);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to update the blood camp.',
+        });
+        setUpdating(false);
       });
   };
 
@@ -292,8 +420,257 @@ export default function AdminCampaigns() {
                   onChange={e => setDescription(e.target.value)} 
                 />
               </div>
+              <div>
+                <Label htmlFor="camp-image">Camp Banner / Image</Label>
+                <Input 
+                  id="camp-image" 
+                  type="file" 
+                  accept="image/*"
+                  onChange={e => {
+                    const files = e.target.files;
+                    if (files && files.length > 0) {
+                      setCampImage(files[0]);
+                    }
+                  }} 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="camp-contact-person">Contact Person</Label>
+                  <Input 
+                    id="camp-contact-person" 
+                    placeholder="e.g. Rahul Sharma" 
+                    value={contactPerson} 
+                    onChange={e => setContactPerson(e.target.value)} 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="camp-contact-number">Contact Number</Label>
+                  <Input 
+                    id="camp-contact-number" 
+                    placeholder="e.g. 9876543210" 
+                    value={contactNumber} 
+                    onChange={e => setContactNumber(e.target.value)} 
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="camp-blood-groups">Blood Groups Urgently Needed</Label>
+                <Input 
+                  id="camp-blood-groups" 
+                  placeholder="e.g. O-, A+, B-" 
+                  value={bloodGroupsNeeded} 
+                  onChange={e => setBloodGroupsNeeded(e.target.value)} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="camp-maps-link">Google Maps Location Link</Label>
+                <Input 
+                  id="camp-maps-link" 
+                  placeholder="https://maps.google.com/..." 
+                  value={googleMapsLink} 
+                  onChange={e => setGoogleMapsLink(e.target.value)} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="camp-reg-link">External Registration Link (Optional)</Label>
+                <Input 
+                  id="camp-reg-link" 
+                  placeholder="https://docs.google.com/forms/..." 
+                  value={registrationLink} 
+                  onChange={e => setRegistrationLink(e.target.value)} 
+                />
+              </div>
               <Button type="submit" className="w-full gap-2 bg-destructive hover:bg-destructive/90 text-white font-medium" disabled={creating}>
                 {creating ? <><Loader2 className="h-4 w-4 animate-spin" /> Organizing...</> : <><CheckCircle className="h-4 w-4" /> Save &amp; Publish Camp</>}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Camp Dialog Modal */}
+        <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-left">Edit Blood Camp</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdateCamp} className="space-y-4 pt-4 text-left">
+              <div>
+                <Label htmlFor="edit-camp-name">Camp Name *</Label>
+                <Input 
+                  id="edit-camp-name" 
+                  placeholder="e.g. Mega Blood Drive" 
+                  value={editName} 
+                  onChange={e => setEditName(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-camp-organizer">Organizer *</Label>
+                <Input 
+                  id="edit-camp-organizer" 
+                  placeholder="e.g. Rotary Club" 
+                  value={editOrganizer} 
+                  onChange={e => setEditOrganizer(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-camp-location">Location Address *</Label>
+                  <Input 
+                    id="edit-camp-location" 
+                    placeholder="e.g. Community Center" 
+                    value={editLocation} 
+                    onChange={e => setEditLocation(e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div>
+                  <Label>Area / Zone *</Label>
+                  <Select value={editCampZone} onValueChange={setEditCampZone} required>
+                    <SelectTrigger><SelectValue placeholder="Select zone" /></SelectTrigger>
+                    <SelectContent>
+                      {MUMBAI_ZONES.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-camp-date">Date *</Label>
+                  <Input 
+                    id="edit-camp-date" 
+                    type="date" 
+                    value={editDate} 
+                    onChange={e => setEditDate(e.target.value)} 
+                    required 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-camp-time">Time Range *</Label>
+                  <Input 
+                    id="edit-camp-time" 
+                    placeholder="e.g. 9:00 AM - 5:00 PM" 
+                    value={editTime} 
+                    onChange={e => setEditTime(e.target.value)} 
+                    required 
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit-camp-slots">Maximum Slots Capacity</Label>
+                <Input 
+                  id="edit-camp-slots" 
+                  type="number" 
+                  value={editSlots} 
+                  onChange={e => setEditSlots(e.target.value)} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-camp-desc">Description</Label>
+                <Textarea 
+                  id="edit-camp-desc" 
+                  placeholder="Details about the blood camp drive..." 
+                  value={editDescription} 
+                  onChange={e => setEditDescription(e.target.value)} 
+                />
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={editStatus} onValueChange={setEditStatus} required>
+                  <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="ongoing">Ongoing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-camp-image">Camp Banner / Image</Label>
+                {editCurrentImageUrl && !removeCurrentImage && (
+                  <div className="mb-2 flex items-center justify-between p-2 bg-slate-50 border rounded-md">
+                    <span className="text-xs truncate max-w-[200px]">Current Image: {editCurrentImageUrl.split('/').pop()}</span>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-destructive hover:bg-destructive/10 text-xs px-2 h-7"
+                      onClick={() => setRemoveCurrentImage(true)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
+                
+                {(!editCurrentImageUrl || removeCurrentImage) ? (
+                  <Input 
+                    id="edit-camp-image" 
+                    type="file" 
+                    accept="image/*"
+                    onChange={e => {
+                      const files = e.target.files;
+                      if (files && files.length > 0) {
+                        setEditCampImage(files[0]);
+                      }
+                    }} 
+                  />
+                ) : (
+                  <p className="text-[10px] text-muted-foreground">Remove the current image to upload a new one.</p>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-camp-contact-person">Contact Person</Label>
+                  <Input 
+                    id="edit-camp-contact-person" 
+                    placeholder="e.g. Rahul Sharma" 
+                    value={editContactPerson} 
+                    onChange={e => setEditContactPerson(e.target.value)} 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-camp-contact-number">Contact Number</Label>
+                  <Input 
+                    id="edit-camp-contact-number" 
+                    placeholder="e.g. 9876543210" 
+                    value={editContactNumber} 
+                    onChange={e => setEditContactNumber(e.target.value)} 
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit-camp-blood-groups">Blood Groups Urgently Needed</Label>
+                <Input 
+                  id="edit-camp-blood-groups" 
+                  placeholder="e.g. O-, A+, B-" 
+                  value={editBloodGroupsNeeded} 
+                  onChange={e => setEditBloodGroupsNeeded(e.target.value)} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-camp-maps-link">Google Maps Location Link</Label>
+                <Input 
+                  id="edit-camp-maps-link" 
+                  placeholder="https://maps.google.com/..." 
+                  value={editGoogleMapsLink} 
+                  onChange={e => setEditGoogleMapsLink(e.target.value)} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-camp-reg-link">External Registration Link (Optional)</Label>
+                <Input 
+                  id="edit-camp-reg-link" 
+                  placeholder="https://docs.google.com/forms/..." 
+                  value={editRegistrationLink} 
+                  onChange={e => setEditRegistrationLink(e.target.value)} 
+                />
+              </div>
+              <Button type="submit" className="w-full gap-2 bg-destructive hover:bg-destructive/90 text-white font-medium" disabled={updating}>
+                {updating ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</> : <><CheckCircle className="h-4 w-4" /> Save Changes</>}
               </Button>
             </form>
           </DialogContent>
@@ -400,6 +777,15 @@ export default function AdminCampaigns() {
                                 onClick={() => handleApprove(c.id)}
                               >
                                 <CheckCircle className="h-4 w-4 text-success" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                title="Edit"
+                                disabled={actionId === c.id}
+                                onClick={() => startEditCamp(c)}
+                              >
+                                <Edit className="h-4 w-4 text-primary" />
                               </Button>
                               <Button 
                                 size="sm" 

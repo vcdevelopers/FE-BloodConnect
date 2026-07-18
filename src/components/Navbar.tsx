@@ -7,6 +7,7 @@ const navLinks = [
   { label: 'Home', href: '/' },
   { label: 'Search Blood', href: '/search' },
   { label: 'Request Blood', href: '/request' },
+  { label: 'Blood Camps', href: '/camps' },
   { label: 'Community', href: '/community' },
 ];
 

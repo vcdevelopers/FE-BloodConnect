@@ -4,6 +4,8 @@ import { Search, Heart, Droplets, Users, Activity, Calendar, ArrowRight, CheckCi
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { mockStats, mockCampaigns } from '@/lib/mock-data';
+import { useToast } from '@/hooks/use-toast';
+import { CampCard, Camp } from '@/components/CampCard';
 
 const steps = [
   { step: 1, title: 'Search Blood', description: 'Find available blood in hospitals and blood banks near you.', icon: Search },
@@ -13,8 +15,10 @@ const steps = [
 
 export default function Index() {
   const [statsData, setStatsData] = useState(mockStats);
-  const [camps, setCamps] = useState<any[]>([]);
+  const [camps, setCamps] = useState<Camp[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bookingId, setBookingId] = useState<number | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadStats = () => {
@@ -27,7 +31,7 @@ export default function Index() {
     };
 
     const loadCamps = () => {
-      fetch('/api/camps/')
+      fetch('/api/camps/?status=upcoming')
         .then(res => res.json())
         .then(data => {
           setCamps(data);
@@ -50,6 +54,37 @@ export default function Index() {
       clearInterval(campsInterval);
     };
   }, []);
+
+  const handleRegister = (campId: number) => {
+    setBookingId(campId);
+    fetch(`/api/camps/${campId}/book_slot/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Booking failed');
+        return res.json();
+      })
+      .then(updatedCamp => {
+        toast({
+          title: "Registration Successful",
+          description: `You are now registered for the drive: ${updatedCamp.name}`,
+        });
+        setCamps(prev => prev.map(c => c.id === campId ? updatedCamp : c));
+        setBookingId(null);
+      })
+      .catch(err => {
+        console.error(err);
+        toast({
+          variant: "destructive",
+          title: "Registration Failed",
+          description: "Could not book your slot. Please try again.",
+        });
+        setBookingId(null);
+      });
+  };
 
   const stats = [
     { label: 'Registered Donors', value: statsData.totalDonors.toLocaleString(), icon: Users, color: 'text-primary' },
@@ -121,29 +156,13 @@ export default function Index() {
               <p className="mt-2 text-muted-foreground">Find and register for active blood donation drives near you in Mumbai</p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-              {camps.filter(c => c.status === 'upcoming').map((c) => (
-                <Card key={c.id} className="overflow-hidden border shadow-md hover:shadow-lg transition-shadow bg-card/60 backdrop-blur">
-                  <CardContent className="p-6 flex flex-col justify-between h-full space-y-4">
-                    <div>
-                      <div className="flex items-center gap-1.5 text-xs text-primary font-semibold mb-2 bg-primary/10 w-fit px-2 py-0.5 rounded-full">
-                        <Calendar className="h-3 w-3" /> {c.date}
-                      </div>
-                      <h3 className="font-bold text-lg leading-tight text-foreground">{c.name}</h3>
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{c.description || 'No description provided.'}</p>
-                    </div>
-                    <div className="border-t pt-4 space-y-2 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-foreground">Location:</span> {c.location} • {c.zone}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-foreground">Time:</span> {c.time}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-foreground">Organizer:</span> {c.organizer}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+              {camps.filter(c => c.status === 'upcoming').slice(0, 3).map((c) => (
+                <CampCard 
+                  key={c.id} 
+                  camp={c} 
+                  bookingId={bookingId} 
+                  handleRegister={handleRegister} 
+                />
               ))}
             </div>
           </div>
