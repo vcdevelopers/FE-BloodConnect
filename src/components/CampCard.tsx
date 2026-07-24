@@ -2,6 +2,7 @@ import { Calendar, Clock, MapPin, Users, ExternalLink, Loader2 } from 'lucide-re
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { GoogleMapModal } from '@/components/GoogleMapModal';
 
 export interface Camp {
   id: number;
@@ -88,18 +89,24 @@ export function CampCard({ camp, bookingId, handleRegister }: CampCardProps) {
           </div>
 
           {/* Google Maps link */}
-          {camp.google_maps_link && (
-            <div className="mb-4">
+          <div className="mb-4">
+            {camp.google_maps_link ? (
               <a 
                 href={camp.google_maps_link} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:underline"
               >
-                <MapPin className="h-3.5 w-3.5" /> View location on Google Maps <ExternalLink className="h-3 w-3" />
+                <MapPin className="h-3.5 w-3.5" /> View this on Google Map <ExternalLink className="h-3 w-3" />
               </a>
-            </div>
-          )}
+            ) : (
+              <GoogleMapModal 
+                query={`${camp.name}, ${camp.location}, ${camp.zone || 'Mumbai'}, Maharashtra`} 
+                title={camp.name || 'Camp Location'} 
+                className="font-bold dark:text-rose-400 mt-0"
+              />
+            )}
+          </div>
 
           {camp.description && (
             <p className="mb-4 text-xs text-muted-foreground leading-relaxed italic min-h-[36px] line-clamp-3">

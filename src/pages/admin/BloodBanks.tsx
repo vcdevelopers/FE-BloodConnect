@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Droplets, RefreshCw, Search, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Loader2, Droplets, RefreshCw, Search, ChevronDown, ChevronUp, AlertTriangle, MapPin, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BLOOD_GROUPS } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
-
+import { getGoogleMapsUrl, getGoogleMapsQuery } from '../SearchBlood';
+import { GoogleMapModal } from '@/components/GoogleMapModal';
+import { GoogleAddressText } from '@/components/GoogleAddressText';
 export default function AdminBloodBanks() {
   const [bloodBanks, setBloodBanks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -175,8 +177,14 @@ export default function AdminBloodBanks() {
                 <div className="mb-4">
                   <h3 className="text-lg font-bold text-foreground">{bb.name}</h3>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    {bb.location || bb.district} • <span className="font-medium text-foreground/75">{bb.zone || 'Nearby'}</span> • Contact: {bb.contact || '+91 22 2640 0000'}
+                    <GoogleAddressText 
+                      query={getGoogleMapsQuery(bb)} 
+                      fallback={getGoogleMapsQuery(bb)} 
+                    /> • <span className="font-medium text-foreground/75">{bb.zone || 'Nearby'}</span> • Contact: {bb.contact || '+91 22 2640 0000'}
                   </p>
+                  <div className="mt-1.5">
+                    <GoogleMapModal query={getGoogleMapsQuery(bb)} title={bb.name || 'Location'} />
+                  </div>
                 </div>
 
                 {/* Available Inventory Section */}

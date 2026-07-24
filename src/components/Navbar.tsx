@@ -17,37 +17,27 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      {/* Expanded header desktop height to give the upscaled logo plenty of breathing room */}
-      <div className="container flex h-16 items-center justify-between lg:h-24">
+      {/* Expanded header desktop and mobile height to give upscaled logos clear readability */}
+      <div className="container flex h-20 items-center justify-between lg:h-28">
         
         {/* Left branding area */}
-        <Link to="/" className="flex items-center">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 lg:gap-4">
           
           <img
-              src={`${import.meta.env.BASE_URL}Regal Logo.png`}
-              alt="Regal Logo"
-              className="h-10 w-auto object-contain lg:h-[4.5rem]" 
-            />
-            <img
-              src={`${import.meta.env.BASE_URL}Create Lasting Impact.png`}
-              alt="Create Lasting Impact Logo"
-              className="h-10 w-auto object-contain lg:h-[4.5rem]"
-            />
-            {/* Force-scaling the Rotary logo by 150% using Tailwind's transform tools.
-              If it is STILL too small, change "lg:scale-150" below to "lg:scale-[1.75]" or "lg:scale-[2]"
-            */}
-            <img
-              src={`${import.meta.env.BASE_URL}Rotary.png`}
-              alt="Rotary Logo"
-              className="h-12 w-auto object-contain transform origin-center scale-110 lg:h-[4.5rem] lg:scale-150 lg:mx-4"
-            />
-          
-          {/* Vertical line and all three logos */}
-          {/* <div className="flex items-center 6 border-l-2 pl-4 dark:border-muted">
-            <span className="text-base font-bold tracking-tight lg:text-2xl whitespace-nowrap">
-            <span className="text-primary">Mumbai Blood</span> Tracker
-          </span>
-          </div> */}
+            src={`${import.meta.env.BASE_URL}Regal Logo.png`}
+            alt="Regal Logo"
+            className="h-12 sm:h-14 w-auto object-contain lg:h-20" 
+          />
+          <img
+            src={`${import.meta.env.BASE_URL}Create Lasting Impact.png`}
+            alt="Create Lasting Impact Logo"
+            className="h-12 sm:h-14 w-auto object-contain lg:h-20"
+          />
+          <img
+            src={`${import.meta.env.BASE_URL}Rotary.png`}
+            alt="Rotary Logo"
+            className="h-12 sm:h-14 w-auto object-contain lg:h-20"
+          />
         </Link>
 
         {/* Desktop nav — Clean right side */}

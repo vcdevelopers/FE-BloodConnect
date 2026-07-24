@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Phone, Loader2, ChevronDown, ChevronUp, AlertTriangle, Clock, RefreshCw, Heart } from 'lucide-react';
+import { Search, MapPin, Phone, Loader2, ChevronDown, ChevronUp, AlertTriangle, Clock, RefreshCw, Heart, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { BLOOD_GROUPS, MUMBAI_ZONES } from '@/lib/mock-data';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { GoogleMapModal } from '@/components/GoogleMapModal';
+import { GoogleAddressText } from '@/components/GoogleAddressText';
 
 const formatTimestamp = (ts: string | null | undefined): string => {
   if (!ts) return 'Unknown';
@@ -26,6 +28,41 @@ const formatTimestamp = (ts: string | null | undefined): string => {
   } catch {
     return 'Unknown';
   }
+};
+
+export const getGoogleMapsQuery = (bb: { name?: string; location?: string; district?: string; pincode?: string }) => {
+  const parts: string[] = [];
+  const nameStr = (bb.name || '').trim();
+  const locStr = (bb.location || '').trim();
+  const districtStr = (bb.district || '').trim();
+  const pincodeStr = (bb.pincode || '').trim();
+
+  if (nameStr) {
+    parts.push(nameStr);
+  }
+
+  // Include location detail if distinct from hospital name to avoid redundancy
+  if (locStr && !nameStr.toLowerCase().includes(locStr.toLowerCase()) && !locStr.toLowerCase().includes(nameStr.toLowerCase())) {
+    parts.push(locStr);
+  }
+
+  if (districtStr) {
+    parts.push(districtStr);
+  } else {
+    parts.push('Mumbai');
+  }
+
+  parts.push('Maharashtra');
+
+  if (pincodeStr) {
+    parts.push(pincodeStr);
+  }
+
+  return parts.filter(Boolean).join(', ');
+};
+
+export const getGoogleMapsUrl = (bb: { name?: string; location?: string; district?: string; pincode?: string }) => {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getGoogleMapsQuery(bb))}`;
 };
 
 export default function SearchBlood() {
@@ -352,11 +389,17 @@ return (
                         <MapPin className="h-4 w-4 text-primary/75 shrink-0 mt-0.5" /> 
                         <div>
                           <p className="font-medium text-foreground/80 leading-normal">
-                            {bb.location || bb.name}, Maharashtra - {bb.pincode}
+                            <GoogleAddressText 
+                              query={getGoogleMapsQuery(bb)} 
+                              fallback={getGoogleMapsQuery(bb)} 
+                            />
                           </p>
                           <p className="text-xs text-muted-foreground mt-0.5">
                             District: {bb.district} • {bb.zone} Zone
                           </p>
+                          <div className="mt-1.5">
+                            <GoogleMapModal query={getGoogleMapsQuery(bb)} title={bb.name || 'Location'} />
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Heart, MessageSquare, Plus, AlertCircle, Quote, 
-  Sparkles, Filter, Loader2, Calendar, CheckCircle, RefreshCw,
+  Sparkles, Loader2, Calendar, CheckCircle, RefreshCw,
   Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,6 @@ interface CommunityPost {
 
 // Predefined Category Info for display
 const CATEGORIES = [
-  { value: 'all', label: 'All Posts', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200' },
   { value: 'experience', label: 'Experiences', color: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400' },
   { value: 'story', label: 'Stories', color: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400' },
   { value: 'feeling', label: 'Feelings', color: 'bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/40 dark:text-pink-400' },
@@ -58,8 +57,7 @@ export default function Community() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Filtering & Dialog states
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  // Dialog states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [likedPosts, setLikedPosts] = useState<number[]>(() => {
     const saved = localStorage.getItem('liked_posts');
@@ -69,7 +67,7 @@ export default function Community() {
   // Form Fields
   const [authorName, setAuthorName] = useState('');
   const [bloodGroup, setBloodGroup] = useState('none');
-  const [postCategory, setPostCategory] = useState('experience');
+  const [postCategory, setPostCategory] = useState('story');
   const [postTitle, setPostTitle] = useState('');
   const [postContent, setPostContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -267,14 +265,12 @@ export default function Community() {
   const resetForm = () => {
     setAuthorName('');
     setBloodGroup('none');
-    setPostCategory('experience');
+    setPostCategory('story');
     setPostTitle('');
     setPostContent('');
   };
 
-  const filteredPosts = selectedCategory === 'all'
-    ? posts
-    : posts.filter(post => post.category === selectedCategory);
+  const filteredPosts = posts;
 
   const formatDate = (isoString: string) => {
     try {
@@ -304,10 +300,10 @@ export default function Community() {
               <Sparkles className="h-3 w-3 animate-pulse" /> Community Corner
             </span>
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
-              Shared Feelings, <br/>Saved Lives in Mumbai.
+              Community Stories That Inspire Blood Donation
             </h1>
-            <p className="text-sm md:text-base text-white/95 font-medium italic">
-              "Every blood donor is a lifesaver. Your courage and generosity keep our community beating."
+            <p className="text-sm md:text-base text-white/95 font-medium leading-relaxed">
+              Read inspiring experiences, discover ongoing awareness campaigns, and see how every blood donation helps strengthen our community.
             </p>
             
             <div className="pt-2">
@@ -322,10 +318,10 @@ export default function Community() {
                   <form onSubmit={handleCreatePost}>
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-                        <Sparkles className="h-5 w-5 text-rose-500" /> Share Your Feelings
+                        <Sparkles className="h-5 w-5 text-rose-500" /> Share Your Story
                       </DialogTitle>
                       <DialogDescription>
-                        Inspire the Mumbai community by posting your blood donation experience or a motivating message.
+                        Inspire the Mumbai community by posting your blood donation experience, campaign, or a motivating message.
                       </DialogDescription>
                     </DialogHeader>
 
@@ -364,8 +360,8 @@ export default function Community() {
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="experience">Experience Sharing</SelectItem>
                             <SelectItem value="story">Personal Story</SelectItem>
+                            <SelectItem value="experience">Experience Sharing</SelectItem>
                             <SelectItem value="feeling">Donor Feelings</SelectItem>
                             <SelectItem value="motivation">Motivation</SelectItem>
                             <SelectItem value="campaign">Awareness Campaign</SelectItem>
@@ -425,30 +421,7 @@ export default function Community() {
           </div>
         </div>
 
-        {/* Filter Bar with Category Pills */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6 mb-8">
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-semibold">
-            <Filter className="h-4 w-4" /> Filter Feed:
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map(cat => {
-              const isActive = selectedCategory === cat.value;
-              return (
-                <button
-                  key={cat.value}
-                  onClick={() => setSelectedCategory(cat.value)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-semibold border transition-all duration-200 ${
-                    isActive 
-                      ? 'bg-rose-600 text-white border-rose-600 shadow-sm scale-105' 
-                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100/85'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+
 
         {/* Loading Skeletons */}
         {loading && (
@@ -500,9 +473,9 @@ export default function Community() {
         {!loading && !error && filteredPosts.length === 0 && (
           <div className="text-center py-16 bg-white dark:bg-slate-900/40 rounded-2xl border border-dashed p-8">
             <MessageSquare className="mx-auto h-12 w-12 text-slate-300 mb-4" />
-            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">No posts in this category</h3>
+            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300">No stories found yet</h3>
             <p className="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
-              Be the first to share your feelings or motivational stories with other donors in Mumbai!
+              Be the first to share your blood donation experience or awareness campaign with other donors in Mumbai!
             </p>
             <Button className="mt-4 bg-rose-600 hover:bg-rose-700 text-white gap-2" onClick={() => setIsDialogOpen(true)}>
               <Plus className="h-4 w-4" /> Share Your Story
@@ -527,7 +500,7 @@ export default function Community() {
                       
                       {/* Header with category badge and date */}
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <Badge className={`${categoryDetails?.color || ''} border font-medium px-2.5 py-0.5 shadow-none rounded-md`}>
+                        <Badge className={`${categoryDetails?.color || 'bg-rose-50 text-rose-700 border-rose-200'} border font-medium px-2.5 py-0.5 shadow-none rounded-md`}>
                           {categoryLabels[post.category] || post.category}
                         </Badge>
                         <span className="flex items-center gap-1">
@@ -605,3 +578,4 @@ export default function Community() {
     </div>
   );
 }
+

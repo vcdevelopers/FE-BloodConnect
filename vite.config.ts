@@ -14,8 +14,8 @@ export default defineConfig(({ mode }) => ({
     },
     proxy: {
       //'/api': 'http://127.0.0.1:8000',
-      //'/media': 'http://127.0.0.1:8000'
-     '/api': 'https://api.bloodconnect.digielvestech.in',
+      // '/media': 'http://127.0.0.1:8000'
+      '/api': 'https://api.bloodconnect.digielvestech.in',
       '/media': 'https://media.bloodconnect.digielvestech.in'
     }
   },

@@ -10,21 +10,21 @@ export function Footer() {
           
           {/* Section 1: Brand & Logos */}
           <div className="flex flex-col gap-4">
-            <div className="flex flex-row items-center gap-4 flex-wrap">
+            <div className="flex flex-row items-center gap-3 sm:gap-4 md:gap-5 flex-wrap">
               <img
                 src={`${import.meta.env.BASE_URL}Regal Logo.png`}
                 alt="Regal Logo"
-                className="h-10 w-auto object-contain lg:h-[3.5rem]" 
+                className="h-12 sm:h-14 w-auto object-contain lg:h-20" 
               />
               <img
                 src={`${import.meta.env.BASE_URL}Create Lasting Impact.png`}
                 alt="Create Lasting Impact Logo"
-                className="h-10 w-auto object-contain lg:h-[4.5rem]" 
+                className="h-12 sm:h-14 w-auto object-contain lg:h-20" 
               />
               <img
                 src={`${import.meta.env.BASE_URL}Rotary.png`}
                 alt="Rotary Logo"
-                className="h-10 w-auto object-contain lg:h-[5rem]" 
+                className="h-12 sm:h-14 w-auto object-contain lg:h-20" 
               />
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">
